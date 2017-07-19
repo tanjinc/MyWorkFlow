@@ -256,29 +256,63 @@ public class MyWorkFlowService extends AccessibilityService {
 
     }
 
-    private void clickView(AutoTestControllMsg msg, Enum type, ArrayList<AccessibilityNodeInfo> list){
+    /**
+     * 点击函数
+     * @param msg 节点储存信息
+     * @param list 界面节点集合
+     */
+    private void clickView(AutoTestControllMsg msg, ArrayList<AccessibilityNodeInfo> list){
+        int count = 0;
+        String key;
         if(msg.getText() != null){
-
-
-
+            for(AccessibilityNodeInfo info : list){
+                key = (String) info.getText();
+                if(key != null && key.equals(msg.getText()));
+                ++count;
+                if(count == msg.getTextInstance()){
+                    info.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                    break;
+                }
+            }
             return;
         }
 
         if(msg.getId() != null){
-
-
+            for(AccessibilityNodeInfo info : list){
+                key = info.getViewIdResourceName();
+                if(key != null && key.equals(msg.getId()));
+                ++count;
+                if(count == msg.getIdInstance()){
+                    info.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                    break;
+                }
+            }
             return;
         }
 
         if(msg.getContent() != null){
-
-
+            for(AccessibilityNodeInfo info : list){
+                key = (String) info.getContentDescription();
+                if(key != null && key.equals(msg.getContent()));
+                ++count;
+                if(count == msg.getContentInstance()){
+                    info.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                    break;
+                }
+            }
             return;
         }
 
         if(msg.getClazz() != null){
-
-
+            for(AccessibilityNodeInfo info : list){
+                key = (String) info.getClassName();
+                if(key != null && key.equals(msg.getClazz()));
+                ++count;
+                if(count == msg.getClazzInstance()){
+                    info.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                    break;
+                }
+            }
             return;
         }
     }
