@@ -8,7 +8,9 @@ import android.content.ServiceConnection;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.support.annotation.RequiresApi;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -18,7 +20,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
+import java.util.logging.Logger;
 
 
 /**
@@ -224,7 +226,6 @@ public class MyWorkFlowService extends AccessibilityService {
                 break;
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
                 getrowNode();
-//                getrowNode();    // 更新界面时遍历刷新infoView的值
 //                AccessibilityNodeInfo noteInfo = getRootInActiveWindow();
 //                if (noteInfo != null) {
 //                    Log.d(TAG, noteInfo.toString());
@@ -239,6 +240,14 @@ public class MyWorkFlowService extends AccessibilityService {
 //                    Log.d(TAG, "video onAccessibilityEvent: id == " + mNodeMap.get(packetName));
 //                }
 
+//                AccessibilityNodeInfo source = event.getSource();
+//                if (source != null & event.getClassName().equals("android.widget.EditText")) {
+//                    Bundle arguments = new Bundle();
+//                    arguments.putCharSequence(AccessibilityNodeInfo
+//                            .ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, "android");
+//                    source.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
+//                }
+
                 eventText = "TYPE_WINDOW_CONTENT_CHANGED";
                 break;
         }
@@ -246,6 +255,69 @@ public class MyWorkFlowService extends AccessibilityService {
 
 
     }
+
+    /**
+     * 点击函数
+     * @param msg 节点储存信息
+     * @param list 界面节点集合
+     */
+    private void clickView(AutoTestControllMsg msg, ArrayList<AccessibilityNodeInfo> list){
+        int count = 0;
+        String key;
+        if(msg.getText() != null){
+            for(AccessibilityNodeInfo info : list){
+                key = (String) info.getText();
+                if(key != null && key.equals(msg.getText()));
+                ++count;
+                if(count == msg.getTextInstance()){
+                    info.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                    break;
+                }
+            }
+            return;
+        }
+
+        if(msg.getId() != null){
+            for(AccessibilityNodeInfo info : list){
+                key = info.getViewIdResourceName();
+                if(key != null && key.equals(msg.getId()));
+                ++count;
+                if(count == msg.getIdInstance()){
+                    info.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                    break;
+                }
+            }
+            return;
+        }
+
+        if(msg.getContent() != null){
+            for(AccessibilityNodeInfo info : list){
+                key = (String) info.getContentDescription();
+                if(key != null && key.equals(msg.getContent()));
+                ++count;
+                if(count == msg.getContentInstance()){
+                    info.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                    break;
+                }
+            }
+            return;
+        }
+
+        if(msg.getClazz() != null){
+            for(AccessibilityNodeInfo info : list){
+                key = (String) info.getClassName();
+                if(key != null && key.equals(msg.getClazz()));
+                ++count;
+                if(count == msg.getClazzInstance()){
+                    info.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                    break;
+                }
+            }
+            return;
+        }
+    }
+
+
 
 
 

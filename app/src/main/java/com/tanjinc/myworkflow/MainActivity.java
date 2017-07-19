@@ -3,8 +3,12 @@ package com.tanjinc.myworkflow;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
+import android.os.Handler;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -16,6 +20,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private MyWorkFlowServiceHelper mHelper;
 
+    private Handler handler = new Handler();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,11 +29,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         mSettingView = (MagicGroup) findViewById(R.id.setting_layout);
         mHelper = new MyWorkFlowServiceHelper(getApplicationContext());
-        if (mHelper.serviceEnable(getPackageName()+"/.MyWorkFlowService")) {
+
+        if (mHelper.serviceEnable(getPackageName()+"/com.tanjinc.myworkflow.MyWorkFlowService")) {
             Toast.makeText(MainActivity.this, "服务已启动", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(MainActivity.this, "服务未启动", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    openAccessbility();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     @Override
@@ -54,5 +76,71 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
         Toast.makeText(MainActivity.this, " id click: " + view.getId(), Toast.LENGTH_SHORT).show();
+    }
+
+
+    // 打开无障碍辅助开关，此功能需要系统签名
+    private void openAccessbility(){
+        int i = 0;
+        if (!isAccessibilitySettingsOn()) {
+            while (i < 5) {
+                openAccessibilityService();
+                if (!isAccessibilitySettingsOn()) {
+                    openAccessibilityService();
+                    Log.d(TAG, "打开辅助开关失败");
+                    i++;
+                } else {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "打开辅助开关成功", Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                    Log.d(TAG, "打开辅助开关成功");
+                    return;
+                }
+            }
+        }else{
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MainActivity.this, "辅助开关状态：开启", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
+    }
+
+    private void openAccessibilityService() {
+        Settings.Secure.putString(getContentResolver(), "enabled_accessibility_services", "com.meizu.testdevVideo/com.tanjinc.myworkflow.MyWorkFlowService");
+        Settings.Secure.putInt(getContentResolver(), "accessibility_enabled", 1);
+    }
+
+
+    public boolean isAccessibilitySettingsOn() {
+        int accessibilityEnabled = 0;
+        String service = "com.meizu.testdevVideo/com.tanjinc.myworkflow.MyWorkFlowService";
+        try {
+            accessibilityEnabled = Settings.Secure.getInt(getApplicationContext().getContentResolver(), "accessibility_enabled");
+        } catch (Settings.SettingNotFoundException e) {
+        }
+        TextUtils.SimpleStringSplitter mStringColonSplitter = new TextUtils.SimpleStringSplitter(':');
+        if (accessibilityEnabled != 1) {
+            return false;
+        }
+        String settingValue = Settings.Secure.getString(getApplicationContext().getContentResolver(), "enabled_accessibility_services");
+        if (settingValue == null) {
+            return false;
+        }
+        TextUtils.SimpleStringSplitter splitter = mStringColonSplitter;
+        splitter.setString(settingValue);
+        while (splitter.hasNext()) {
+            if (splitter.next().equalsIgnoreCase(service)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
