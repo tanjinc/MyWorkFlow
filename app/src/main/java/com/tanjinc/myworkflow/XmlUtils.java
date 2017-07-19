@@ -4,7 +4,6 @@ import android.graphics.Rect;
 import android.os.Environment;
 import android.util.Log;
 import android.util.Xml;
-import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
@@ -25,9 +24,11 @@ public class XmlUtils {
      * @param xmlName
      *
      */
-    public static void saveXml(String xmlName, String packetName, List<Rect> list) {
+    public static void saveXml(String xmlName, String packetName, List<AutoTestControllMsg> actions) {
         try {
+            Log.d(TAG, "saveXml()");
             File file = new File(Environment.getExternalStorageDirectory(), xmlName);
+
             FileOutputStream fos = new FileOutputStream(file);
             // 获得一个序列化工具
             XmlSerializer serializer = Xml.newSerializer();
@@ -36,11 +37,37 @@ public class XmlUtils {
             serializer.startDocument("utf-8", true);
 
             serializer.startTag(null, "packetName");
-            serializer.attribute(null, "id", packetName);
-            for (Rect r : list ) {
-                serializer.startTag(null, "rect");
-                serializer.attribute(null, "id", r.toString());
-                serializer.endTag(null, "rect");
+            serializer.text(packetName);
+            if (actions != null) {
+                for (AutoTestControllMsg msg : actions) {
+                    serializer.startTag(null, "idInfo");
+
+                    serializer.startTag(null, "id");
+                    serializer.text(msg.getId() != null ? msg.getId() : "");
+                    serializer.endTag(null, "id");
+
+                    serializer.startTag(null, "idInstance");
+                    serializer.text(String.valueOf(msg.getIdInstance()));
+                    serializer.endTag(null, "idInstance");
+
+                    serializer.startTag(null, "text");
+                    serializer.text(msg.getText());
+                    serializer.endTag(null, "text");
+
+                    serializer.startTag(null, "textInstance");
+                    serializer.text(String.valueOf(msg.getTextInstance()));
+                    serializer.endTag(null, "textInstance");
+
+                    serializer.startTag(null, "contentInstance");
+                    serializer.text(String.valueOf(msg.getContentInstance()));
+                    serializer.endTag(null, "contentInstance");
+
+                    serializer.startTag(null, "content");
+                    serializer.text(msg.getContent() != null ? msg.getContent() : "");
+                    serializer.endTag(null, "content");
+
+                    serializer.endTag(null, "idInfo");
+                }
             }
             serializer.endTag(null, "packetName");
 

@@ -120,10 +120,12 @@ public class MyWorkFlowService extends AccessibilityService {
     }
 
     private long id;
+    private String recordPacketName; //当前录制的视频包名
     private AutoTestControllMsg msg = new AutoTestControllMsg();
+    private ArrayList<AutoTestControllMsg> mActionArray = new ArrayList();
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
         int eventType = accessibilityEvent.getEventType();
-        String packetName = String.valueOf(accessibilityEvent.getPackageName());
+        packetName = String.valueOf(accessibilityEvent.getPackageName());
         String eventText = "";
         switch (eventType) {
             case AccessibilityEvent.TYPE_VIEW_CLICKED:
@@ -135,27 +137,32 @@ public class MyWorkFlowService extends AccessibilityService {
 
                 // 获取到ID或索引值，就可以进行点击
 
-                msg.clear();
-                recordView.clear();    // 暂存值，防止这一过程页面变化点击过快，infoView再出什么变化
-                recordView.addAll(infoView);
+                if (Utils.isAutoBoxRecording(getApplicationContext(), packetName)) {
+                    msg.clear();
+                    recordView.clear();    // 暂存值，防止这一过程页面变化点击过快，infoView再出什么变化
+                    recordView.addAll(infoView);
 
-                msg.setId(getViewIdBySearchAllView(accessibilityEvent.getSource(), recordView));
-                msg.setIdInstance(getViewInstance(msg.getId(), accessibilityEvent.getSource(),
-                        WidgetType.ID, recordView));
-                msg.setText((String) accessibilityEvent.getSource().getText());
-                msg.setTextInstance(getViewInstance(msg.getText(), accessibilityEvent.getSource(),
-                        WidgetType.TEXT, recordView));
+                    msg.setId(getViewIdBySearchAllView(accessibilityEvent.getSource(), recordView));
+                    msg.setIdInstance(getViewInstance(msg.getId(), accessibilityEvent.getSource(),
+                            WidgetType.ID, recordView));
+                    msg.setText((String) accessibilityEvent.getSource().getText());
+                    msg.setTextInstance(getViewInstance(msg.getText(), accessibilityEvent.getSource(),
+                            WidgetType.TEXT, recordView));
 
-                msg.setClazz((String)accessibilityEvent.getSource().getClassName());
-                msg.setClazzInstance(getViewInstance(msg.getClazz(), accessibilityEvent.getSource(),
-                        WidgetType.CLASS, recordView));
-                msg.setContent((String) accessibilityEvent.getSource().getContentDescription());
-                msg.setContentInstance(getViewInstance(msg.getContent(), accessibilityEvent.getSource(),
-                        WidgetType.CONTENT, recordView));
+                    msg.setClazz((String) accessibilityEvent.getSource().getClassName());
+                    msg.setClazzInstance(getViewInstance(msg.getClazz(), accessibilityEvent.getSource(),
+                            WidgetType.CLASS, recordView));
+                    msg.setContent((String) accessibilityEvent.getSource().getContentDescription());
+                    msg.setContentInstance(getViewInstance(msg.getContent(), accessibilityEvent.getSource(),
+                            WidgetType.CONTENT, recordView));
 
-                Log.d(TAG, msg.toString());
-                Log.d(TAG, "==============End====================");
 
+                    mActionArray.add(msg);
+
+                    Log.d(TAG, msg.toString());
+                    Log.d(TAG, "==============End====================");
+
+                }
                 break;
             case AccessibilityEvent.TYPE_VIEW_FOCUSED:
                 eventText = "TYPE_VIEW_FOCUSED";
@@ -171,10 +178,28 @@ public class MyWorkFlowService extends AccessibilityService {
                 break;
             case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
                 eventText = "TYPE_WINDOW_STATE_CHANGED";
-                getrowNode();
+
+                if (!packetName.equals(recordPacketName)) {
+                    //如果当前包名不等于录制包,则判断录制结束
+                    if (Utils.isAutoBoxRecording(getApplicationContext(), recordPacketName)) {
+                        //录制结束。保存到xml
+                        if (mActionArray.size() >0) {
+                            XmlUtils.saveXml(recordPacketName+".xml", recordPacketName, mActionArray);
+                            mActionArray.clear();
+                        }
+                        Utils.setAutoBoxRecording(getApplicationContext(), recordPacketName, false);
+                    }
+                    recordPacketName = packetName;
+                }
+
+
+
                 break;
             case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
                 eventText = "TYPE_NOTIFICATION_STATE_CHANGED";
+//                if (mActionArray.size() >0) {
+//                    XmlUtils.saveXml(packetName+".xml", packetName, mActionArray);
+//                }
                 break;
             case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END:
                 eventText = "TYPE_TOUCH_EXPLORATION_GESTURE_END";
@@ -217,7 +242,7 @@ public class MyWorkFlowService extends AccessibilityService {
                 eventText = "TYPE_WINDOW_CONTENT_CHANGED";
                 break;
         }
-        Log.d(TAG, "video onAccessibilityEvent: eventText = " + eventText);
+        Log.d(TAG, "video onAccessibilityEvent: packet=" + packetName +"eventText = " + eventText);
 
 
     }

@@ -3,6 +3,7 @@ package com.tanjinc.myworkflow;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -60,5 +61,27 @@ public class Utils {
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "video runApp: ", e );
         }
+    }
+
+    /**
+     * 设置录制开始,结束
+     * 保存参数
+     */
+    public static void setAutoBoxRecording(Context context, String packetName, boolean isStart) {
+        SharedPreferences preferences = context.getSharedPreferences("AutoBox", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        Log.d(TAG, "video setAutoBoxRecording: packet:" + packetName + " isStart=" + isStart);
+        editor.putBoolean(packetName, isStart);
+        editor.apply();
+    }
+    /**
+     * 判断是否再录制
+     * @return
+     */
+    public static boolean isAutoBoxRecording(Context context, String packetName){
+        SharedPreferences preferences = context.getSharedPreferences("AutoBox", Context.MODE_PRIVATE);
+        boolean ret = preferences.getBoolean(packetName, false);
+        Log.d(TAG, "video isAutoBoxRecording: packetName:" + packetName + " recording=" + ret);
+        return ret;
     }
 }
