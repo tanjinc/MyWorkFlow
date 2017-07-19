@@ -30,6 +30,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mSettingView = (MagicGroup) findViewById(R.id.setting_layout);
         mHelper = new MyWorkFlowServiceHelper(getApplicationContext());
 
+        if (mHelper.serviceEnable(getPackageName()+"/com.tanjinc.myworkflow.MyWorkFlowService")) {
+            Toast.makeText(MainActivity.this, "服务已启动", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(MainActivity.this, "服务未启动", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -42,23 +47,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     openAccessbility();
                 }catch (Exception e){
                     e.printStackTrace();
-                }
-                if (mHelper.serviceEnable(getPackageName()+"/com.tanjinc.myworkflow.MyWorkFlowService")) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(MainActivity.this, "服务已启动", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
-                } else {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(MainActivity.this, "服务未启动", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
                 }
             }
         }).start();
@@ -102,13 +90,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Log.d(TAG, "打开辅助开关失败");
                     i++;
                 } else {
-                    Toast.makeText(this, "打开辅助开关成功", Toast.LENGTH_LONG).show();
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "打开辅助开关成功", Toast.LENGTH_LONG).show();
+                        }
+                    });
+
                     Log.d(TAG, "打开辅助开关成功");
                     return;
                 }
             }
         }else{
-            Toast.makeText(this, "辅助开关状态：开启", Toast.LENGTH_LONG).show();
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MainActivity.this, "辅助开关状态：开启", Toast.LENGTH_LONG).show();
+                }
+            });
         }
 
     }
