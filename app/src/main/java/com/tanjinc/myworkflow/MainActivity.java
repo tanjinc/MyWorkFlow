@@ -1,6 +1,7 @@
 package com.tanjinc.myworkflow;
 
 import android.app.AlertDialog;
+import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
@@ -12,9 +13,13 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.tanjinc.myworkflow.utils.XmlUtils;
+
+import java.util.Calendar;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "MainActivity";
@@ -22,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private MagicGroup mSettingView;
     private int i;
 
-    private Button mAddTaskBtn;
+    private Button mAddTaskBtn, mAddTimeTick;
     private TaskListLayout mTaskListLayout;
     private MyWorkFlowServiceHelper mHelper;
 
@@ -44,12 +49,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         mAddTaskBtn = (Button) findViewById(R.id.add_btn);
+        mAddTimeTick = (Button) findViewById(R.id.btn2);
         mAddTaskBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //添加任务
                 mTaskListLayout.addTask(new TaskListLayout.TaskInfo("任务" + i));
                 i++;
+            }
+        });
+
+        mAddTimeTick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        // 设置定时任务
+                        long startTime = (hourOfDay * Constants.TIME.MINUTES_OF_HOUR + minute)
+                                * Constants.TIME.SECONDS_OF_MINUTE * Constants.TIME.MILLS_OF_SECOND;
+                        AlarmSetting.getInstance().setRepeatAlarm(getApplicationContext(),
+                                Constants.ACTION.ACTION_AUTOBOX_TASK, startTime);
+                    }
+                }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true);
+                timePickerDialog.setTitle("选择定时时间");
+                timePickerDialog.show();
             }
         });
 

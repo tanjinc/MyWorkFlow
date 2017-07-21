@@ -9,6 +9,7 @@ import android.os.Message;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.tanjinc.myworkflow.utils.DensityUtil;
 import com.tanjinc.myworkflow.utils.Utils;
 
 /**
@@ -43,15 +44,15 @@ public class FloatBall extends View {
 
     public void init(Context context) {
         mContext = context;
-        width = Utils.DensityUtil.dip2px(context, 50);
-        height = Utils.DensityUtil.dip2px(context, 50);
+        width = DensityUtil.dip2px(context, 50);
+        height = DensityUtil.dip2px(context, 50);
 
         ballPaint = new Paint();
         ballPaint.setColor(context.getResources().getColor(R.color.colorPrimary));
         ballPaint.setAntiAlias(true);
 
         textPaint = new Paint();
-        textPaint.setTextSize(Utils.DensityUtil.dip2px(context, 15));
+        textPaint.setTextSize(DensityUtil.dip2px(context, 15));
         textPaint.setColor(Color.WHITE);
         textPaint.setAntiAlias(true);
         textPaint.setFakeBoldText(true);

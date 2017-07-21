@@ -33,6 +33,14 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/workflow_accessibility_config" />
         </service>
+
+        <receiver
+            android:name=".AlarmReceiver">
+            <intent-filter>
+                <action android:name="intent.action.autobox.task" />
+            </intent-filter>
+
+        </receiver>
     </application>
 
 </manifest>

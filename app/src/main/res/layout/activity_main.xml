@@ -28,6 +28,13 @@
         android:layout_margin="10dp"
         android:text="选择应用"
         android:onClick="onClick"/>
+    <Button
+        android:id="@+id/btn2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="添加定时"
+        android:onClick="onClick"/>
 
     <include layout="@layout/setting_layout"/>
 </LinearLayout>

@@ -10,6 +10,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.tanjinc.myworkflow.utils.DensityUtil;
 import com.tanjinc.myworkflow.utils.Utils;
 
 
@@ -54,7 +55,7 @@ public class ViewManager implements View.OnClickListener{
         windowManager = (WindowManager) this.context.getSystemService(Context.WINDOW_SERVICE);
         screeenWidth = windowManager.getDefaultDisplay().getWidth();
         screeenHeight = windowManager.getDefaultDisplay().getHeight();
-        edgeDistance = Utils.DensityUtil.dip2px(this.context, 15);
+        edgeDistance = DensityUtil.dip2px(this.context, 15);
         floatBall.setOnClickListener(onClickListener);
     }
 
@@ -94,7 +95,7 @@ public class ViewManager implements View.OnClickListener{
             floatBallParams = new WindowManager.LayoutParams();
             floatBallParams.x = Math.round(screeenWidth - floatBall.width - edgeDistance);
             floatBallParams.y = Math.round(screeenHeight - floatBall.height
-                    - edgeDistance - Utils.DensityUtil.getStatusBarHeight(context));
+                    - edgeDistance - DensityUtil.getStatusBarHeight(context));
             floatBallParams.width = floatBall.width;
             floatBallParams.height = floatBall.height;
             floatBallParams.gravity = Gravity.TOP | Gravity.START;
