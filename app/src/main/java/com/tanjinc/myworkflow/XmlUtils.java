@@ -56,7 +56,7 @@ public class XmlUtils {
             serializer.startDocument("utf-8", true);
 
             serializer.startTag(null, "taskName");
-            serializer.text(autoTaskBean.getTaskName());
+            serializer.attribute(null, "taskId", autoTaskBean.getTaskName());
 
             serializer.startTag(null, "packetName");
             serializer.text(autoTaskBean.getPacketName());
@@ -84,6 +84,14 @@ public class XmlUtils {
                 serializer.startTag(null, "textInstance");
                 serializer.text(String.valueOf(msg.getTextInstance()));
                 serializer.endTag(null, "textInstance");
+
+                serializer.startTag(null, "clazz");
+                serializer.text(msg.getClazz() != null ? msg.getClazz() : "");
+                serializer.endTag(null, "clazz");
+
+                serializer.startTag(null, "clazzInstance");
+                serializer.text(String.valueOf(msg.getClazzInstance()));
+                serializer.endTag(null, "clazzInstance");
 
                 serializer.startTag(null, "contentInstance");
                 serializer.text(String.valueOf(msg.getContentInstance()));
@@ -116,37 +124,6 @@ public class XmlUtils {
 
     }
 
-
-    public static void readXml2(String xmlName) {
- 
-        try {
-            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = builderFactory.newDocumentBuilder();
-            
-            File path = new File(xmlDirPath, xmlName);
-            FileInputStream fis = new FileInputStream(path);
-
-            Document document = builder.parse(fis);
-            Element element = document.getDocumentElement();
-            NodeList nodeList = element.getElementsByTagName("lan");
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                Element lan = (Element) nodeList.item(i);
-                Log.d(TAG, "video realXml2: " + ((Element) nodeList.item(i)).getTagName());
-//                text.append(lan.getAttribute("id") + "\n");
-//                text.append(lan.getElementsByTagName("name").item(0).getTextContent() + " ");
-//                text.append(lan.getElementsByTagName("ide").item(0).getTextContent() + " ");
-//                text.append(lan.getElementsByTagName("type").item(0).getTextContent() + " ");
-//                text.append("\n");
-            }
-
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
     /**
      * 读取xml文件
      * @param xmlName
@@ -162,8 +139,12 @@ public class XmlUtils {
 
 
         try {
-            File path = new File(xmlDirPath, xmlName);
-            FileInputStream fis = new FileInputStream(path);
+            File xmlFile = new File(xmlDirPath, xmlName);
+            FileInputStream fis = new FileInputStream(xmlFile);
+            if (!xmlFile.exists()) {
+                Log.e(TAG, "video readXml: " + xmlName + " not exit");
+                return null;
+            }
 
             // 获得pull解析器对象
             XmlPullParser parser = Xml.newPullParser();
@@ -187,7 +168,7 @@ public class XmlUtils {
                     case XmlPullParser.START_TAG: // 当前等于开始节点 <person>
 
                         if ("taskName".equals(tagName)) {
-//                            autoTask.setTaskName(parser.nextText());
+                            autoTask.setTaskName(parser.getAttributeValue(0));
                         } else if ("packetName".equals(tagName)) { // <person id="1">
                             packetName = parser.nextText();
                             autoTask.setPacketName(packetName);
@@ -197,21 +178,38 @@ public class XmlUtils {
                             msg.setText(parser.nextText());
                         } else if ("textInstance".equals(tagName)) {
                             String textInstance = parser.nextText();
+                            if (textInstance != null) {
+                                msg.setTextInstance(Integer.valueOf(textInstance));
+                            }
                         } else if ("id".equals(tagName)) {
                             String id = parser.nextText();
                             msg.setId(id);
                         } else if ("idInstance".equals(tagName)) {
-//                            idInstance = Integer.valueOf(parser.getText());
+                            String idInstance = parser.nextText();
+                            if (idInstance != null) {
+                                msg.setIdInstance(Integer.valueOf(idInstance));
+                            }
                         } else if ("clazz".equals(tagName)) {
-                            String clazz = parser.getText();
+                            String clazz = parser.nextText();
                             msg.setClazz(clazz);
                         } else if ("clazzInstance".equals(tagName)) {
-//                            clazzInstance = Integer.valueOf(parser.nextText());
+                            String clazzInstance = parser.nextText();
+                            if (clazzInstance != null) {
+                                msg.setClazzInstance(Integer.valueOf(clazzInstance));
+                            }
                         } else if ("content".equals(tagName)) {
                             String content = parser.nextText();
                             msg.setContent(content);
                         } else if ("contentInstance".equals(tagName)) {
-//                            contentInstance = Integer.valueOf(parser.nextText());
+                            String contentInstance = parser.nextText();
+                            if (contentInstance != null) {
+                                msg.setContentInstance(Integer.valueOf(contentInstance));
+                            }
+                        } else if ("actionType".equals(tagName)) {
+                            String actionType = parser.nextText();
+                            msg.setActionType(actionType);
+                        } else if ("inputText".equals(tagName)) {
+                            msg.setInputText(parser.nextText());
                         }
                         break;
                     case XmlPullParser.END_TAG: // </persons>

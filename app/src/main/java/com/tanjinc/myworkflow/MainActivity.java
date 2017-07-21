@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onItemClick(TaskListLayout.TaskInfo taskInfo) {
                 //执行任务
                 Log.d(TAG, "video onItemClick: " + XmlUtils.readXml(taskInfo.taskName));
+                startTask(taskInfo.taskName);
             }
         });
 
@@ -60,6 +61,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mSettingView = (MagicGroup) findViewById(R.id.setting_layout);
         mHelper = new MyWorkFlowServiceHelper(getApplicationContext());
 
+    }
+
+
+    private void startTask(String taskName) {
+        Intent intent = new Intent();
+        intent.putExtra("taskName", taskName);
+        intent.setAction(MyWorkFlowService.AUTOBOX_START_APP);
+        sendBroadcast(intent);
     }
 
     @Override

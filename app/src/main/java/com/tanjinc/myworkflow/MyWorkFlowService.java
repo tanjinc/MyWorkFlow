@@ -3,7 +3,10 @@ package com.tanjinc.myworkflow;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
@@ -12,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.annotation.RequiresApi;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -28,6 +32,8 @@ import java.util.List;
  */
 public class MyWorkFlowService extends AccessibilityService {
     private static final String TAG = "MyWorkFlowService";
+
+    public static final String AUTOBOX_START_APP = "autobox_start_app";
     public static String CurFocused = "";
     public static String CurNotification = "";
     static AccessibilityNodeInfo rowNode = null;
@@ -39,6 +45,7 @@ public class MyWorkFlowService extends AccessibilityService {
     private Handler handler;
 
 
+
     @Override
     protected void onServiceConnected() {
         Log.d(TAG, "video onServiceConnected: ");
@@ -48,30 +55,43 @@ public class MyWorkFlowService extends AccessibilityService {
         ViewManager.getInstance(this).showFloatBall();
         ViewManager.getInstance(MyWorkFlowService.this).isRecord(true);
         handler = new Handler();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Utils.runApp(MyWorkFlowService.this, "com.android.mms");
-                try {
-                    Thread.sleep(4000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                ArrayList<AutoTaskNodeBean> caseList = AddCaseTest.getCaseList2();
-                for (AutoTaskNodeBean caseDetail : caseList){
-                    runAutoCase(caseDetail, true, 5000);
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                ViewManager.getInstance(MyWorkFlowService.this).isRecord(false);
 
-                Log.d(TAG, "Task finish");
-            }
-        }).start();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(AUTOBOX_START_APP);
+        registerReceiver(mBroadcastReceiver, intentFilter);
     }
+
+
+    private void doAutoTask(String taskName) {
+        AutoTaskBean autoTaskBean = XmlUtils.readXml(taskName);
+        Utils.runApp(getApplicationContext(), autoTaskBean.packetName);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        for (AutoTaskNodeBean caseDetail : autoTaskBean.getNodeArray()){
+            runAutoCase(caseDetail, true, 5000);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            Log.d(TAG, "video onReceive: action = " + action);
+            if (action.equals(AUTOBOX_START_APP)) {
+                String taskName = intent.getStringExtra("taskName");
+                doAutoTask(taskName);
+            }
+        }
+    };
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     protected AccessibilityNodeInfo getRootInWindow() {
@@ -352,7 +372,7 @@ public class MyWorkFlowService extends AccessibilityService {
             }
 
             if(nodeBean.getActionType().equals("click")){
-                if(nodeBean.getText() != null){
+                if(!TextUtils.isEmpty(nodeBean.getText())){
                     for(AccessibilityNodeInfo info : infoView){
                         keyValue = String.valueOf(info.getText()) ;
                         if(keyValue != null && keyValue.equals(nodeBean.getText())){
@@ -372,7 +392,7 @@ public class MyWorkFlowService extends AccessibilityService {
                     }
                 }
 
-                if(nodeBean.getId() != null){
+                if(!TextUtils.isEmpty(nodeBean.getId())){
                     for(AccessibilityNodeInfo info : infoView){
                         keyValue = info.getViewIdResourceName();
                         if(keyValue != null && keyValue.equals(nodeBean.getId())){
@@ -391,7 +411,7 @@ public class MyWorkFlowService extends AccessibilityService {
                     }
                 }
 
-                if(nodeBean.getContent() != null){
+                if(!TextUtils.isEmpty(nodeBean.getContent())){
                     for(AccessibilityNodeInfo info : infoView){
                         keyValue = (String) info.getContentDescription();
                         if(keyValue != null && keyValue.equals(nodeBean.getContent())){
@@ -410,7 +430,7 @@ public class MyWorkFlowService extends AccessibilityService {
                     }
                 }
 
-                if(nodeBean.getClazz() != null){
+                if(!TextUtils.isEmpty(nodeBean.getClazz())){
                     for(AccessibilityNodeInfo info : infoView){
                         keyValue = (String) info.getClassName();
                         if(keyValue != null && keyValue.equals(nodeBean.getClazz())){
@@ -430,7 +450,7 @@ public class MyWorkFlowService extends AccessibilityService {
                 }
             }
 
-            if(nodeBean.getActionType().equals("inputText") && nodeBean.getClazz() != null){
+            if(nodeBean.getActionType().equals("inputText") && !TextUtils.isEmpty(nodeBean.getClazz())){
                 for(AccessibilityNodeInfo info : infoView){
                     keyValue = (String) info.getClassName();
                     if(keyValue != null && keyValue.equals(nodeBean.getClazz())){
@@ -689,5 +709,6 @@ public class MyWorkFlowService extends AccessibilityService {
     public void onDestroy() {
         super.onDestroy();
         ViewManager.getInstance(this).hideFloatBall();
+        unregisterReceiver(mBroadcastReceiver);
     }
 }

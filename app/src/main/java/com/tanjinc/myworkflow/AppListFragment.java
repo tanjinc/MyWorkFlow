@@ -101,7 +101,7 @@ public class AppListFragment extends DialogFragment {
         PackageManager pm = this.getActivity().getPackageManager();
         List<PackageInfo> packages = pm.getInstalledPackages(0);
         for (PackageInfo packageInfo : packages) {
-//            if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+            if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
                 // 非系统应用
                 AppInfo info = new AppInfo();
                 info.appName = packageInfo.applicationInfo.loadLabel(pm).toString();
@@ -110,9 +110,9 @@ public class AppListFragment extends DialogFragment {
                 // 获取该应用安装包的Intent，用于启动该应用
                 info.appIntent = pm.getLaunchIntentForPackage(packageInfo.packageName);
                 mDataArray.add(info);
-//            } else {
-//                // 系统应用　　　　　　　　
-//            }
+            } else {
+                // 系统应用　　　　　　　　
+            }
 
         }
         return result;

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class AutoTaskBean {
     String taskName;    //任务名
     String packetName;  //包名
-    ArrayList<AutoTaskNodeBean> nodeArray;   //控件信息
+    ArrayList<AutoTaskNodeBean> nodeArray = new ArrayList<>();   //控件信息
 
     public String getTaskName() {
         return taskName;
@@ -31,7 +31,7 @@ public class AutoTaskBean {
     }
 
     public void setNodeArray(ArrayList<AutoTaskNodeBean> nodeArray) {
-        this.nodeArray = nodeArray;
+        this.nodeArray.addAll(nodeArray);
     }
 
     @Override
