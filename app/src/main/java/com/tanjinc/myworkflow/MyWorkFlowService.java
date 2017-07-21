@@ -269,12 +269,13 @@ public class MyWorkFlowService extends AccessibilityService {
                         //录制结束。保存到xml
                         if (mActionArray.size() >0) {
                             AutoTaskBean autoTaskBean = new AutoTaskBean();
-                            autoTaskBean.setTaskName("任务:" + recordPacketName);
+                            autoTaskBean.setTaskName(Constants.recordTaskName);
                             autoTaskBean.setPacketName(recordPacketName);
                             autoTaskBean.setNodeArray(mActionArray);
                             XmlUtils.saveXml(recordPacketName+".xml", autoTaskBean);
                             mActionArray.clear();
                         }
+                        ViewManager.getInstance(getApplicationContext()).isRecord(false);
                         Utils.setAutoBoxRecording(getApplicationContext(), recordPacketName, false);
                     }
                     recordPacketName = packetName;

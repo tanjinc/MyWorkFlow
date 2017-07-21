@@ -5,6 +5,7 @@ package com.tanjinc.myworkflow;
  */
 public class Constants {
     static String appPacketName;
+    static String recordTaskName;
     // 时间常量
     public class TIME {
         public static final int MINUTE = 60 * 1000;         // 1分钟

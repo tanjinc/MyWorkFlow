@@ -7,34 +7,51 @@
     android:orientation="vertical"
     tools:context="com.tanjinc.myworkflow.MainActivity">
 
+    <RelativeLayout
+        android:layout_margin="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="90dp">
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="#000"
+            android:textSize="64sp"
+            android:text="Things"/>
+        <TextView
+            android:id="@+id/add_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:textColor="#000"
+            android:textSize="64sp"
+            android:layout_marginRight="10dp"
+            android:text="+"
+            android:onClick="onClick"
+            />
+    </RelativeLayout>
     <com.tanjinc.myworkflow.TaskListLayout
         android:id="@+id/task_layout"
         android:layout_width="match_parent"
-        android:layout_height="200dp">
+        android:layout_height="300dp">
 
     </com.tanjinc.myworkflow.TaskListLayout>
 
-    <Button
-        android:id="@+id/add_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="Add"
-        android:onClick="onClick"/>
-    <Button
-        android:id="@+id/btn1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="选择应用"
-        android:onClick="onClick"/>
-    <Button
-        android:id="@+id/btn2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="添加定时"
-        android:onClick="onClick"/>
+    <!--<Button-->
+        <!--android:id="@+id/btn1"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_margin="10dp"-->
+        <!--android:text="选择应用"-->
+        <!--android:onClick="onClick"/>-->
+    <!--<Button-->
+        <!--android:id="@+id/btn2"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_margin="10dp"-->
+        <!--android:text="添加定时"-->
+        <!--android:onClick="onClick"/>-->
 
-    <include layout="@layout/setting_layout"/>
+    <!--<include layout="@layout/setting_layout"/>-->
 </LinearLayout>

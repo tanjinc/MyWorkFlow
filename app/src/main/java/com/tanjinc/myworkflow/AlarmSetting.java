@@ -76,6 +76,7 @@ public class AlarmSetting {
     public void setRepeatAlarm(Context context, String action, long startTime){
         Bundle bundle = new Bundle();
         bundle.putLong("startTime", startTime);
+//        bundle.putString("taskName", taskName);
         Calendar c = Calendar.getInstance();
         long currentHourMinuteToMills = (c.get(Calendar.HOUR_OF_DAY)
                 * Constants.TIME.MINUTES_OF_HOUR + c.get(Calendar.MINUTE))

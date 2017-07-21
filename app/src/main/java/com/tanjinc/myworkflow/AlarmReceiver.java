@@ -21,13 +21,23 @@ public class AlarmReceiver extends BroadcastReceiver {
             Bundle bundle = intent.getExtras();
             if(bundle != null){
                 long startTime = bundle.getLong("startTime", 0);
-                String xmlName = bundle.getString("xmlName");
+                String taskName = bundle.getString("taskName");
                 Log.d(TAG, "startTime = " + startTime);
-                Log.d(TAG, "xmlName = " + xmlName);
+                Log.d(TAG, "taskName = " + taskName);
+
+                startTask(context, taskName);
+
                 // 设置重复闹钟
-                AlarmSetting.getInstance().setRepeatAlarm(context,
-                        Constants.ACTION.ACTION_AUTOBOX_TASK, startTime);
+//                AlarmSetting.getInstance().setRepeatAlarm(context,
+//                        Constants.ACTION.ACTION_AUTOBOX_TASK, startTime);
             }
         }
+    }
+
+    private void startTask(Context context, String taskName) {
+        Intent intent = new Intent();
+        intent.putExtra("taskName", taskName);
+        intent.setAction(MyWorkFlowService.AUTOBOX_START_APP);
+        context.sendBroadcast(intent);
     }
 }

@@ -1,6 +1,7 @@
 package com.tanjinc.myworkflow;
 
 import android.content.Context;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -8,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.tanjinc.myworkflow.utils.XmlUtils;
@@ -53,7 +55,7 @@ public class TaskListLayout extends FrameLayout {
         mRecyclerView = (RecyclerView) findViewById(R.id.task_recycler_view);
         mAdapter = new Adapter();
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+        mRecyclerView.setLayoutManager(new GridLayoutManager(context, 2));
 
         updateData();
     }
@@ -89,6 +91,10 @@ public class TaskListLayout extends FrameLayout {
 
         private ArrayList<TaskInfo> mTaskInfos;
 
+        private int[] colors = {R.drawable.rectangle, R.drawable.rectangle1,
+                R.drawable.rectangle2, R.drawable.rectangle3, R.drawable.rectangle4, R.drawable.rectangle5,
+                R.drawable.rectangle6, R.drawable.rectangle7};
+        private int[] icons = {R.drawable.weibo, R.drawable.weixin, R.drawable.camera, R.drawable.music};
 
         public void setData(ArrayList<TaskInfo> data) {
             mTaskInfos = data;
@@ -114,6 +120,14 @@ public class TaskListLayout extends FrameLayout {
                         }
                     }
                 });
+
+                if (taskInfo.taskName.equals("微信")) {
+                    holder.root.setBackground(getResources().getDrawable(R.drawable.rectangle3));
+                    holder.mIcon.setImageDrawable(getResources().getDrawable(R.drawable.weixin));
+                } else {
+                    holder.root.setBackground(getResources().getDrawable(colors[position % colors.length]));
+                    holder.mIcon.setImageDrawable(getResources().getDrawable(icons[position % 4]));
+                }
             }
 
         }
@@ -126,10 +140,14 @@ public class TaskListLayout extends FrameLayout {
 
     static class TaskViewHolder extends RecyclerView.ViewHolder {
         TextView mTaskNameTv;
+        ImageView mIcon;
+        ViewGroup root;
 
         public TaskViewHolder(View itemView) {
             super(itemView);
+            root = (ViewGroup) itemView.findViewById(R.id.task_name_layout);
             mTaskNameTv = (TextView) itemView.findViewById(R.id.task_name_id);
+            mIcon = (ImageView) itemView.findViewById(R.id.task_icon);
         }
     }
 }

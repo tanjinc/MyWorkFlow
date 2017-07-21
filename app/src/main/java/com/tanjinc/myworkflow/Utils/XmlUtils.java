@@ -36,7 +36,7 @@ public class XmlUtils {
                 dirFile.mkdir();
             }
 
-            File file = new File(xmlDirPath, xmlName);
+            File file = new File(xmlDirPath, autoTaskBean.getTaskName());
             if (file.exists()) {
                 file.delete();
             }
@@ -235,8 +235,13 @@ public class XmlUtils {
         if (files != null && files.length != 0) {
             for (File file : files) {
                 Log.d(TAG, "video queryXmlFiles: " + file.getName());
-
-                xmlFiles.add(file.getName());
+                String taskName = file.getName();
+                if (taskName.startsWith("com.tencent.mm")) {
+                    taskName = "微信";
+                } else if(taskName.startsWith("com.tencent.mobileqq")) {
+                    taskName = "QQ";
+                }
+                xmlFiles.add(taskName);
             }
         }
         return xmlFiles;

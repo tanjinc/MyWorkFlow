@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -24,10 +25,10 @@ import java.util.Calendar;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "MainActivity";
 
-    private MagicGroup mSettingView;
+//    private MagicGroup mSettingView;
     private int i;
 
-    private Button mAddTaskBtn, mAddTimeTick;
+    private View mAddTaskBtn;
     private TaskListLayout mTaskListLayout;
     private MyWorkFlowServiceHelper mHelper;
 
@@ -48,36 +49,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        mAddTaskBtn = (Button) findViewById(R.id.add_btn);
-        mAddTimeTick = (Button) findViewById(R.id.btn2);
+        mAddTaskBtn =  findViewById(R.id.add_btn);
         mAddTaskBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //添加任务
-                mTaskListLayout.addTask(new TaskListLayout.TaskInfo("任务" + i));
-                i++;
+//                mTaskListLayout.addTask(new TaskListLayout.TaskInfo("任务" + i));
+//                i++;
+                startActivity(new Intent(MainActivity.this, AddTaskActivity.class));
             }
         });
 
-        mAddTimeTick.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        // 设置定时任务
-                        long startTime = (hourOfDay * Constants.TIME.MINUTES_OF_HOUR + minute)
-                                * Constants.TIME.SECONDS_OF_MINUTE * Constants.TIME.MILLS_OF_SECOND;
-                        AlarmSetting.getInstance().setRepeatAlarm(getApplicationContext(),
-                                Constants.ACTION.ACTION_AUTOBOX_TASK, startTime);
-                    }
-                }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true);
-                timePickerDialog.setTitle("选择定时时间");
-                timePickerDialog.show();
-            }
-        });
 
-        mSettingView = (MagicGroup) findViewById(R.id.setting_layout);
+//        mSettingView = (MagicGroup) findViewById(R.id.setting_layout);
         mHelper = new MyWorkFlowServiceHelper(getApplicationContext());
 
     }
@@ -123,21 +107,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         switch(view.getId()) {
-            case R.id.btn1:
-
-                // 1. 打开一个应用
-                // 2. 在应用中执行某些操作
-//                Utils.runApp(getApplicationContext(), "com.meizu.media.video");
-                AppListFragment appDialog = new AppListFragment();
-                appDialog.show(getFragmentManager(),"Dialog");
-
-                break;
-
             case R.id.add_btn:
 //                mSettingView.addMagicView("控件 " + (i++));
                 break;
         }
-        Toast.makeText(MainActivity.this, " id click: " + view.getId(), Toast.LENGTH_SHORT).show();
     }
 
 

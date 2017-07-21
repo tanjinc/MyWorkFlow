@@ -117,4 +117,8 @@ public class FloatBall extends View {
         }
     }
 
+    public void isRunning(boolean isRun) {
+
+    }
+
 }
