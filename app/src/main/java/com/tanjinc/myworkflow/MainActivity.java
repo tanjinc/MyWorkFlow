@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onItemClick(TaskListLayout.TaskInfo taskInfo) {
                 //执行任务
-                XmlUtils.readXml(taskInfo.taskName);
+                Log.d(TAG, "video onItemClick: " + XmlUtils.readXml(taskInfo.taskName));
             }
         });
 

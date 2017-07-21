@@ -4,7 +4,7 @@ package com.tanjinc.myworkflow;
  * Created by maxueming on 2017/7/18.
  */
 
-public class AutoTestControllMsg {
+public class AutoTaskNodeBean {
     private String text;
     private int textInstance;
     private String id;
@@ -13,6 +13,9 @@ public class AutoTestControllMsg {
     private int clazzInstance;
     private String content;
     private int contentInstance;
+
+    private String actionType;
+    private String inputText;
 
     public void clear(){
         text = null;
@@ -90,9 +93,25 @@ public class AutoTestControllMsg {
         this.contentInstance = contentInstance;
     }
 
+    public String getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(String actionType) {
+        this.actionType = actionType;
+    }
+
+    public String getInputText() {
+        return inputText;
+    }
+
+    public void setInputText(String inputText) {
+        this.inputText = inputText;
+    }
+
     @Override
     public String toString() {
-        return "控件信息{" +
+        return "AutoTaskNodeBean{" +
                 "text='" + text + '\'' +
                 ", textInstance=" + textInstance +
                 ", id='" + id + '\'' +
@@ -101,6 +120,8 @@ public class AutoTestControllMsg {
                 ", clazzInstance=" + clazzInstance +
                 ", content='" + content + '\'' +
                 ", contentInstance=" + contentInstance +
+                ", actionType='" + actionType + '\'' +
+                ", inputText='" + inputText + '\'' +
                 '}';
     }
 }

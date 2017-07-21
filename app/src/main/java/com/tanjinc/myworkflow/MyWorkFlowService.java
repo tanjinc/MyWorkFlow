@@ -8,9 +8,7 @@ import android.content.ServiceConnection;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.support.annotation.RequiresApi;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -20,7 +18,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Logger;
 
 
 /**
@@ -123,7 +120,7 @@ public class MyWorkFlowService extends AccessibilityService {
 
     private long id;
     private String recordPacketName; //当前录制的视频包名
-    private ArrayList<AutoTestControllMsg> mActionArray = new ArrayList();
+    private ArrayList<AutoTaskNodeBean> mActionArray = new ArrayList();
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
         int eventType = accessibilityEvent.getEventType();
         packetName = String.valueOf(accessibilityEvent.getPackageName());
@@ -139,7 +136,7 @@ public class MyWorkFlowService extends AccessibilityService {
                 // 获取到ID或索引值，就可以进行点击
 
                 if (Utils.isAutoBoxRecording(getApplicationContext(), packetName)) {
-                    AutoTestControllMsg msg = new AutoTestControllMsg();
+                    AutoTaskNodeBean msg = new AutoTaskNodeBean();
                     recordView.clear();    // 暂存值，防止这一过程页面变化点击过快，infoView再出什么变化
                     recordView.addAll(infoView);
 
@@ -184,7 +181,11 @@ public class MyWorkFlowService extends AccessibilityService {
                     if (Utils.isAutoBoxRecording(getApplicationContext(), recordPacketName)) {
                         //录制结束。保存到xml
                         if (mActionArray.size() >0) {
-                            XmlUtils.saveXml(recordPacketName+".xml", recordPacketName, mActionArray);
+                            AutoTaskBean autoTaskBean = new AutoTaskBean();
+                            autoTaskBean.setTaskName("任务:" + recordPacketName);
+                            autoTaskBean.setPacketName(recordPacketName);
+                            autoTaskBean.setNodeArray(mActionArray);
+                            XmlUtils.saveXml(recordPacketName+".xml", autoTaskBean);
                             mActionArray.clear();
                         }
                         Utils.setAutoBoxRecording(getApplicationContext(), recordPacketName, false);
@@ -259,7 +260,7 @@ public class MyWorkFlowService extends AccessibilityService {
      * @param msg 节点储存信息
      * @param list 界面节点集合
      */
-    private void clickView(AutoTestControllMsg msg, ArrayList<AccessibilityNodeInfo> list){
+    private void clickView(AutoTaskNodeBean msg, ArrayList<AccessibilityNodeInfo> list){
         int count = 0;
         String key;
         if(msg.getText() != null){

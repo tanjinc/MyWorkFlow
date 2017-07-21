@@ -7,7 +7,8 @@ import java.util.ArrayList;
  */
 public class AutoTaskBean {
     String taskName;    //任务名
-    ArrayList<AutoTestControllMsg> nodeArray;   //控件信息
+    String packetName;  //包名
+    ArrayList<AutoTaskNodeBean> nodeArray;   //控件信息
 
     public String getTaskName() {
         return taskName;
@@ -17,11 +18,28 @@ public class AutoTaskBean {
         this.taskName = taskName;
     }
 
-    public ArrayList<AutoTestControllMsg> getNodeArray() {
+    public String getPacketName() {
+        return packetName;
+    }
+
+    public void setPacketName(String packetName) {
+        this.packetName = packetName;
+    }
+
+    public ArrayList<AutoTaskNodeBean> getNodeArray() {
         return nodeArray;
     }
 
-    public void setNodeArray(ArrayList<AutoTestControllMsg> nodeArray) {
+    public void setNodeArray(ArrayList<AutoTaskNodeBean> nodeArray) {
         this.nodeArray = nodeArray;
+    }
+
+    @Override
+    public String toString() {
+        return "AutoTaskBean{" +
+                "taskName='" + taskName + '\'' +
+                ", packetName='" + packetName + '\'' +
+                ", nodeArray=" + nodeArray +
+                '}';
     }
 }
