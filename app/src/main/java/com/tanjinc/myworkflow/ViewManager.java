@@ -51,7 +51,6 @@ public class ViewManager implements View.OnClickListener{
     public void init(final Context context) {
         this.context = context;
         floatBall = new FloatBall(this.context);
-        floatBall.setFloatBallText("录制中");
         windowManager = (WindowManager) this.context.getSystemService(Context.WINDOW_SERVICE);
         screeenWidth = windowManager.getDefaultDisplay().getWidth();
         screeenHeight = windowManager.getDefaultDisplay().getHeight();
@@ -82,8 +81,13 @@ public class ViewManager implements View.OnClickListener{
         }
     };
 
-    public void isRecord(boolean isRecord){
-        floatBall.isRecord(isRecord);
+    public void setStatus(final int status){
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                floatBall.setStatus(status);
+            }
+        });
     }
 
 

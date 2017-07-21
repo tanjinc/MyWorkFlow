@@ -66,7 +66,7 @@ public class AppListFragment extends DialogFragment {
             @Override
             public void onItemClick(AppInfo appInfo) {
 //                Constants.appPacketName = appInfo.appPacketName;
-                ViewManager.getInstance(getContext()).isRecord(true);
+                ViewManager.getInstance(getActivity().getApplicationContext()).setStatus(FloatBall.TASK_RECORD);
                 Utils.setAutoBoxRecording(getActivity(), appInfo.appPacketName, true);
                 Utils.startApp(getContext(),appInfo.appIntent);
 //                XmlUtils.saveXml(appInfo.appPacketName+".xml",appInfo.appPacketName, null);

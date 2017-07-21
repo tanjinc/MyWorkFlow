@@ -55,8 +55,8 @@ public class MyWorkFlowService extends AccessibilityService {
         super.onServiceConnected();
         settingAccessibilityInfo();
         packetName = getPackageName();
-        ViewManager.getInstance(this).showFloatBall();
-        ViewManager.getInstance(MyWorkFlowService.this).isRecord(true);
+        ViewManager.getInstance(getApplicationContext()).showFloatBall();
+        ViewManager.getInstance(getApplicationContext()).setStatus(FloatBall.TASK_FREE);
         handler = new Handler();
 
         IntentFilter intentFilter = new IntentFilter();
@@ -82,18 +82,26 @@ public class MyWorkFlowService extends AccessibilityService {
             }
         }
 
+        ViewManager.getInstance(getApplicationContext()).setStatus(FloatBall.TASK_FREE);
+
     }
 
     private Thread thread;
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, final Intent intent) {
+            if(thread != null){
+                thread.interrupt();
+                thread = null;
+            }
             thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     String action = intent.getAction();
                     Log.d(TAG, "video onReceive: action = " + action);
                     if (action.equals(AUTOBOX_START_APP)) {
+                        ViewManager.getInstance(getApplicationContext()).setStatus(FloatBall.TASK_RUNNING);
+
                         String taskName = intent.getStringExtra("taskName");
                         doAutoTask(taskName);
                     }
@@ -285,8 +293,9 @@ public class MyWorkFlowService extends AccessibilityService {
                             XmlUtils.saveXml(recordPacketName+".xml", autoTaskBean);
                             mActionArray.clear();
                         }
-                        ViewManager.getInstance(getApplicationContext()).isRecord(false);
+                        ViewManager.getInstance(getApplicationContext()).setStatus(FloatBall.TASK_FREE);
                         Utils.setAutoBoxRecording(getApplicationContext(), recordPacketName, false);
+                        ViewManager.getInstance(getApplicationContext()).setStatus(FloatBall.TASK_RECORD);
                     }
                     recordPacketName = packetName;
                 }
@@ -779,7 +788,7 @@ public class MyWorkFlowService extends AccessibilityService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        ViewManager.getInstance(this).hideFloatBall();
+        ViewManager.getInstance(getApplicationContext()).hideFloatBall();
         unregisterReceiver(mBroadcastReceiver);
     }
 }

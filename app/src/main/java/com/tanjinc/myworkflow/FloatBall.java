@@ -10,7 +10,6 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.tanjinc.myworkflow.utils.DensityUtil;
-import com.tanjinc.myworkflow.utils.Utils;
 
 /**
  * 悬浮球View
@@ -44,15 +43,15 @@ public class FloatBall extends View {
 
     public void init(Context context) {
         mContext = context;
-        width = DensityUtil.dip2px(context, 50);
-        height = DensityUtil.dip2px(context, 50);
+        width = DensityUtil.dip2px(context, 30);
+        height = DensityUtil.dip2px(context, 30);
 
         ballPaint = new Paint();
         ballPaint.setColor(context.getResources().getColor(R.color.colorPrimary));
         ballPaint.setAntiAlias(true);
 
         textPaint = new Paint();
-        textPaint.setTextSize(DensityUtil.dip2px(context, 15));
+        textPaint.setTextSize(DensityUtil.dip2px(context, 10));
         textPaint.setColor(Color.WHITE);
         textPaint.setAntiAlias(true);
         textPaint.setFakeBoldText(true);
@@ -67,9 +66,11 @@ public class FloatBall extends View {
                 case UPDATE_VIEW:
                     //更新
                     if(status == 0){
+                        text = "录制.";
                         ballPaint.setColor(mContext.getResources().getColor(R.color.colorPrimary));
                         status = 1;
                     }else{
+                        text = "录制..";
                         ballPaint.setColor(mContext.getResources().getColor(R.color.colorAccent));
                         status = 0;
                     }
@@ -103,22 +104,33 @@ public class FloatBall extends View {
         canvas.drawText(text, width / 2 - textWidth / 2, height / 2 + dy, textPaint);
     }
 
-    public void setFloatBallText(String text){
-        this.text = text;
-        invalidate();
-    }
 
-    public void isRecord(boolean isStart){
-        if(isStart){
-            handler.post(runnable);
-        }else{
-            handler.removeCallbacks(runnable);
-            handler.removeMessages(UPDATE_VIEW);
+    public static final int TASK_RUNNING = 500;
+    public static final int TASK_FREE = 600;
+    public static final int TASK_RECORD = 700;
+
+    public void setStatus(int status){
+        switch (status){
+            case TASK_RUNNING:
+                handler.removeCallbacks(runnable);
+                handler.removeMessages(UPDATE_VIEW);
+                invalidate();
+                text = "执行";
+                ballPaint.setColor(mContext.getResources().getColor(R.color.colorAccent));
+                invalidate();
+                break;
+            case TASK_FREE:
+                handler.removeCallbacks(runnable);
+                handler.removeMessages(UPDATE_VIEW);
+                text = "空闲";
+                ballPaint.setColor(mContext.getResources().getColor(R.color.colorPrimary));
+                invalidate();
+                break;
+            case TASK_RECORD:
+                handler.post(runnable);
+                break;
         }
     }
 
-    public void isRunning(boolean isRun) {
-
-    }
 
 }
