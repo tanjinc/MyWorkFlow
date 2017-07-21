@@ -5,8 +5,11 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
@@ -33,6 +36,7 @@ public class MyWorkFlowService extends AccessibilityService {
 
     private String packetName = null;
     private HashMap<String, Long> mNodeMap = new HashMap<>();
+    private Handler handler;
 
 
     @Override
@@ -41,6 +45,34 @@ public class MyWorkFlowService extends AccessibilityService {
         super.onServiceConnected();
         settingAccessibilityInfo();
         packetName = getPackageName();
+        handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent();
+                PackageManager packageManager = MyWorkFlowService.this.getPackageManager();
+                intent = packageManager.getLaunchIntentForPackage("com.android.mms");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED | Intent.FLAG_ACTIVITY_CLEAR_TOP) ;
+                Utils.startApp(MyWorkFlowService.this, intent);
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                ArrayList<AutoTaskNodeBean> caseList = AddCaseTest.getCaseList2();
+                for (AutoTaskNodeBean caseDetail : caseList){
+                    runAutoCase(caseDetail, true);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                Log.d(TAG, "Task finish");
+
+            }
+        }, 5 * 1000);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
@@ -140,10 +172,11 @@ public class MyWorkFlowService extends AccessibilityService {
                     recordView.clear();    // 暂存值，防止这一过程页面变化点击过快，infoView再出什么变化
                     recordView.addAll(infoView);
 
+                    msg.setActionType("click");
                     msg.setId(getViewIdBySearchAllView(accessibilityEvent.getSource(), recordView));
                     msg.setIdInstance(getViewInstance(msg.getId(), accessibilityEvent.getSource(),
                             WidgetType.ID, recordView));
-                    msg.setText((String) accessibilityEvent.getSource().getText());
+                    msg.setText(String.valueOf(accessibilityEvent.getSource().getText()));
                     msg.setTextInstance(getViewInstance(msg.getText(), accessibilityEvent.getSource(),
                             WidgetType.TEXT, recordView));
 
@@ -172,6 +205,36 @@ public class MyWorkFlowService extends AccessibilityService {
                 break;
             case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
                 eventText = "TYPE_VIEW_TEXT_CHANGED";
+                if (Utils.isAutoBoxRecording(getApplicationContext(), packetName)) {
+                    AutoTaskNodeBean msg = new AutoTaskNodeBean();
+                    recordView.clear();    // 暂存值，防止这一过程页面变化点击过快，infoView再出什么变化
+                    recordView.addAll(infoView);
+
+                    msg.setActionType("inputText");
+                    msg.setInputText(String.valueOf(accessibilityEvent.getSource().getText()));
+
+
+                    msg.setId(getViewIdBySearchAllView(accessibilityEvent.getSource(), recordView));
+                    msg.setIdInstance(getViewInstance(msg.getId(), accessibilityEvent.getSource(),
+                            WidgetType.ID, recordView));
+
+                    msg.setText(null);
+                    msg.setTextInstance(0);
+
+                    msg.setClazz((String) accessibilityEvent.getSource().getClassName());
+                    msg.setClazzInstance(getViewInstance(msg.getClazz(), accessibilityEvent.getSource(),
+                            WidgetType.CLASS, recordView));
+
+                    msg.setContent((String) accessibilityEvent.getSource().getContentDescription());
+                    msg.setContentInstance(getViewInstance(msg.getContent(), accessibilityEvent.getSource(),
+                            WidgetType.CONTENT, recordView));
+
+
+                    mActionArray.add(msg);
+
+                    Log.d(TAG, "inputText :" + msg.toString());
+                }
+
                 break;
             case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
                 eventText = "TYPE_WINDOW_STATE_CHANGED";
@@ -256,67 +319,97 @@ public class MyWorkFlowService extends AccessibilityService {
     }
 
     /**
-     * 点击函数
-     * @param msg 节点储存信息
-     * @param list 界面节点集合
+     * 选择操作函数
+     * @param nodeBean 节点记录值
+     * @param info 节点node信息
      */
-    private void clickView(AutoTaskNodeBean msg, ArrayList<AccessibilityNodeInfo> list){
-        int count = 0;
-        String key;
-        if(msg.getText() != null){
-            for(AccessibilityNodeInfo info : list){
-                key = (String) info.getText();
-                if(key != null && key.equals(msg.getText()));
-                ++count;
-                if(count == msg.getTextInstance()){
-                    info.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                    break;
-                }
-            }
-            return;
-        }
-
-        if(msg.getId() != null){
-            for(AccessibilityNodeInfo info : list){
-                key = info.getViewIdResourceName();
-                if(key != null && key.equals(msg.getId()));
-                ++count;
-                if(count == msg.getIdInstance()){
-                    info.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                    break;
-                }
-            }
-            return;
-        }
-
-        if(msg.getContent() != null){
-            for(AccessibilityNodeInfo info : list){
-                key = (String) info.getContentDescription();
-                if(key != null && key.equals(msg.getContent()));
-                ++count;
-                if(count == msg.getContentInstance()){
-                    info.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                    break;
-                }
-            }
-            return;
-        }
-
-        if(msg.getClazz() != null){
-            for(AccessibilityNodeInfo info : list){
-                key = (String) info.getClassName();
-                if(key != null && key.equals(msg.getClazz()));
-                ++count;
-                if(count == msg.getClazzInstance()){
-                    info.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                    break;
-                }
-            }
-            return;
+    private void chooseOperation(AutoTaskNodeBean nodeBean, AccessibilityNodeInfo info){
+        if(nodeBean.getActionType().equals("click")){
+            info.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+        }else if(nodeBean.getActionType().equals("inputText")){
+            Bundle arguments = new Bundle();
+            arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+                    nodeBean.getInputText());
+            info.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
         }
     }
 
+    /**
+     * 执行函数
+     * @param nodeBean 节点储存信息
+     */
+    private void runAutoCase(AutoTaskNodeBean nodeBean, boolean isFreshWindowView){
+        int count = 0;
+        String keyValue;
+        if(isFreshWindowView){
+            getrowNode();
+        }
 
+        if(nodeBean.getActionType().equals("click")){
+            if(nodeBean.getText() != null){
+                for(AccessibilityNodeInfo info : infoView){
+                    keyValue = String.valueOf(info.getText()) ;
+                    if(keyValue != null && keyValue.equals(nodeBean.getText())){
+                        ++count;
+                    }
+
+                    if(count == nodeBean.getTextInstance()){
+                        Log.d(TAG, "执行" + info + "=============" + nodeBean.getText());
+                        chooseOperation(nodeBean, info);
+                        break;
+                    }
+                }
+                return;
+            }
+
+            if(nodeBean.getId() != null){
+                for(AccessibilityNodeInfo info : infoView){
+                    keyValue = info.getViewIdResourceName();
+                    if(keyValue != null && keyValue.equals(nodeBean.getId())){
+                        ++count;
+                    }
+
+                    if(count == nodeBean.getIdInstance()){
+                        Log.d(TAG, "执行" + info + "=============" + nodeBean.getId());
+                        chooseOperation(nodeBean, info);
+                        break;
+                    }
+                }
+                return;
+            }
+
+            if(nodeBean.getContent() != null){
+                for(AccessibilityNodeInfo info : infoView){
+                    keyValue = (String) info.getContentDescription();
+                    if(keyValue != null && keyValue.equals(nodeBean.getContent())){
+                        ++count;
+                    }
+
+                    if(count == nodeBean.getContentInstance()){
+                        Log.d(TAG, "执行" + info + "=============" + nodeBean.getContent());
+                        chooseOperation(nodeBean, info);
+                        break;
+                    }
+                }
+                return;
+            }
+        }
+
+        if(nodeBean.getClazz() != null){
+            for(AccessibilityNodeInfo info : infoView){
+                keyValue = (String) info.getClassName();
+                if(keyValue != null && keyValue.equals(nodeBean.getClazz())){
+                    ++count;
+                }
+
+                if(count == nodeBean.getClazzInstance()){
+                    Log.d(TAG, "执行" + info + "=============" + nodeBean.getClazz());
+                    chooseOperation(nodeBean, info);
+                    break;
+                }
+            }
+        }
+    }
 
 
 

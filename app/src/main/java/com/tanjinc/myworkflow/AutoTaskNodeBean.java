@@ -26,6 +26,8 @@ public class AutoTaskNodeBean {
         clazzInstance = 0;
         content = null;
         contentInstance = 0;
+        actionType = null;
+        inputText = null;
     }
 
 
