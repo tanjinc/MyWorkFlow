@@ -1,4 +1,4 @@
-package com.tanjinc.myworkflow;
+package com.tanjinc.myworkflow.utils;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;

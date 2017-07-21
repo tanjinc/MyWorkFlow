@@ -9,6 +9,8 @@ import android.os.Message;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.tanjinc.myworkflow.utils.Utils;
+
 /**
  * 悬浮球View
  * Created by maxueming on 2017/6/6.
@@ -41,15 +43,15 @@ public class FloatBall extends View {
 
     public void init(Context context) {
         mContext = context;
-        width = DensityUtil.dip2px(context, 50);
-        height = DensityUtil.dip2px(context, 50);
+        width = Utils.DensityUtil.dip2px(context, 50);
+        height = Utils.DensityUtil.dip2px(context, 50);
 
         ballPaint = new Paint();
         ballPaint.setColor(context.getResources().getColor(R.color.colorPrimary));
         ballPaint.setAntiAlias(true);
 
         textPaint = new Paint();
-        textPaint.setTextSize(DensityUtil.dip2px(context, 15));
+        textPaint.setTextSize(Utils.DensityUtil.dip2px(context, 15));
         textPaint.setColor(Color.WHITE);
         textPaint.setAntiAlias(true);
         textPaint.setFakeBoldText(true);

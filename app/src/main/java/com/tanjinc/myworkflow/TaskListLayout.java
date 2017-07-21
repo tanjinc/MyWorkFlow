@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.tanjinc.myworkflow.utils.XmlUtils;
+
 import java.util.ArrayList;
 
 /**

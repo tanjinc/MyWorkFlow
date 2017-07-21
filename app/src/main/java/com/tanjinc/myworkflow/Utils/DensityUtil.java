@@ -1,4 +1,4 @@
-package com.tanjinc.myworkflow;
+package com.tanjinc.myworkflow.utils;
 
 import android.content.Context;
 import android.content.res.Resources;

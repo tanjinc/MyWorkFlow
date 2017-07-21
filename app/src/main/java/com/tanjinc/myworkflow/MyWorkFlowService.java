@@ -8,17 +8,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.annotation.RequiresApi;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+
+import com.tanjinc.myworkflow.utils.ShellUtils;
+import com.tanjinc.myworkflow.utils.Utils;
+import com.tanjinc.myworkflow.utils.XmlUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
