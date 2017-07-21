@@ -53,9 +53,11 @@ public class TaskListLayout extends FrameLayout {
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
 
+        updateData();
+    }
+
+    public void updateData() {
         mTaskInfoArrayList.clear();
-
-
         for (String s: XmlUtils.queryXmlFiles() ) {
             mTaskInfoArrayList.add(new TaskInfo(s));
         }

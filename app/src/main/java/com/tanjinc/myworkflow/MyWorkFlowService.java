@@ -306,28 +306,6 @@ public class MyWorkFlowService extends AccessibilityService {
                 break;
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
                 getrowNode();
-//                AccessibilityNodeInfo noteInfo = getRootInActiveWindow();
-//                if (noteInfo != null) {
-//                    Log.d(TAG, noteInfo.toString());
-//                    Log.d(TAG, "video onAccessibilityEvent: " + noteInfo.findAccessibilityNodeInfosByText("通讯录"));
-//                    List<AccessibilityNodeInfo> list = noteInfo.findAccessibilityNodeInfosByViewId("com.tanjinc.myworkflow:id/btn1");
-//                    for (AccessibilityNodeInfo n : list) {
-//                        Log.d(TAG, "video onAccessibilityEvent: id name =" + n.getViewIdResourceName());
-//                        n.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-//                    }
-//                }
-//                if (packetName != null && packetName.equals("com.tencent.mm") && mNodeMap != null) {
-//                    Log.d(TAG, "video onAccessibilityEvent: id == " + mNodeMap.get(packetName));
-//                }
-
-//                AccessibilityNodeInfo source = event.getSource();
-//                if (source != null & event.getClassName().equals("android.widget.EditText")) {
-//                    Bundle arguments = new Bundle();
-//                    arguments.putCharSequence(AccessibilityNodeInfo
-//                            .ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, "android");
-//                    source.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
-//                }
-
                 eventText = "TYPE_WINDOW_CONTENT_CHANGED";
                 break;
         }
@@ -372,7 +350,7 @@ public class MyWorkFlowService extends AccessibilityService {
             }
 
             if(nodeBean.getActionType().equals("click")){
-                if(!TextUtils.isEmpty(nodeBean.getText())){
+                if(isAvaliable(nodeBean.getText())){
                     for(AccessibilityNodeInfo info : infoView){
                         keyValue = String.valueOf(info.getText()) ;
                         if(keyValue != null && keyValue.equals(nodeBean.getText())){
@@ -392,7 +370,7 @@ public class MyWorkFlowService extends AccessibilityService {
                     }
                 }
 
-                if(!TextUtils.isEmpty(nodeBean.getId())){
+                if(isAvaliable(nodeBean.getId())){
                     for(AccessibilityNodeInfo info : infoView){
                         keyValue = info.getViewIdResourceName();
                         if(keyValue != null && keyValue.equals(nodeBean.getId())){
@@ -411,7 +389,7 @@ public class MyWorkFlowService extends AccessibilityService {
                     }
                 }
 
-                if(!TextUtils.isEmpty(nodeBean.getContent())){
+                if(isAvaliable(nodeBean.getContent())){
                     for(AccessibilityNodeInfo info : infoView){
                         keyValue = (String) info.getContentDescription();
                         if(keyValue != null && keyValue.equals(nodeBean.getContent())){
@@ -430,7 +408,7 @@ public class MyWorkFlowService extends AccessibilityService {
                     }
                 }
 
-                if(!TextUtils.isEmpty(nodeBean.getClazz())){
+                if(isAvaliable(nodeBean.getClazz())){
                     for(AccessibilityNodeInfo info : infoView){
                         keyValue = (String) info.getClassName();
                         if(keyValue != null && keyValue.equals(nodeBean.getClazz())){
@@ -450,7 +428,7 @@ public class MyWorkFlowService extends AccessibilityService {
                 }
             }
 
-            if(nodeBean.getActionType().equals("inputText") && !TextUtils.isEmpty(nodeBean.getClazz())){
+            if(nodeBean.getActionType().equals("inputText") && isAvaliable(nodeBean.getClazz())){
                 for(AccessibilityNodeInfo info : infoView){
                     keyValue = (String) info.getClassName();
                     if(keyValue != null && keyValue.equals(nodeBean.getClazz())){
@@ -471,6 +449,9 @@ public class MyWorkFlowService extends AccessibilityService {
         }
     }
 
+    private boolean isAvaliable(String str) {
+        return str != null && !str.equals("null") && !str.equals("");
+    }
 
 
     boolean isRunning;
@@ -526,7 +507,7 @@ public class MyWorkFlowService extends AccessibilityService {
                     ++instance;
                 }
             }else if(type == WidgetType.TEXT){
-                String text = (String) info.getText();
+                String text = info.getText() != null  ? info.getText().toString() : null;
                 if(text != null && text.equals(key)){
                     ++instance;
                 }

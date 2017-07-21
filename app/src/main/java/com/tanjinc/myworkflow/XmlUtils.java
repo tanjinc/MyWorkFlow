@@ -77,9 +77,11 @@ public class XmlUtils {
                 serializer.text(String.valueOf(msg.getIdInstance()));
                 serializer.endTag(null, "idInstance");
 
-                serializer.startTag(null, "text");
-                serializer.text(msg.getText() != null ? msg.getText() : "");
-                serializer.endTag(null, "text");
+                if (msg.getText() != null) {
+                    serializer.startTag(null, "text");
+                    serializer.text(msg.getText());
+                    serializer.endTag(null, "text");
+                }
 
                 serializer.startTag(null, "textInstance");
                 serializer.text(String.valueOf(msg.getTextInstance()));

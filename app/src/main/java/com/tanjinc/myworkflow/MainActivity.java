@@ -92,6 +92,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(MainActivity.this, "服务未启动", Toast.LENGTH_SHORT).show();
             showAccessibilityServiceEnableWarning();
         }
+
+        mTaskListLayout.updateData();
     }
 
     @Override
