@@ -241,13 +241,17 @@ public class MyWorkFlowService extends AccessibilityService {
                     msg.setText(null);
                     msg.setTextInstance(0);
 
-                    msg.setClazz((String) accessibilityEvent.getSource().getClassName());
-                    msg.setClazzInstance(getViewInstance(msg.getClazz(), accessibilityEvent.getSource(),
-                            WidgetType.CLASS, recordView));
-
                     msg.setContent((String) accessibilityEvent.getSource().getContentDescription());
                     msg.setContentInstance(getViewInstance(msg.getContent(), accessibilityEvent.getSource(),
                             WidgetType.CONTENT, recordView));
+
+                    if(!isAvaliable(msg.getId()) && !isAvaliable(msg.getText()) && !isAvaliable(msg.getContent())){
+
+                    }
+
+                    msg.setClazz((String) accessibilityEvent.getSource().getClassName());
+                    msg.setClazzInstance(getViewInstance(msg.getClazz(), accessibilityEvent.getSource(),
+                            WidgetType.CLASS, recordView));
 
 
                     mActionArray.add(msg);
@@ -316,6 +320,8 @@ public class MyWorkFlowService extends AccessibilityService {
 
     }
 
+    
+
     /**
      * 选择操作函数
      * @param nodeBean 节点记录值
@@ -352,6 +358,26 @@ public class MyWorkFlowService extends AccessibilityService {
             }
 
             if(nodeBean.getActionType().equals("click")){
+
+                if(isAvaliable(nodeBean.getId())){
+                    for(AccessibilityNodeInfo info : infoView){
+                        keyValue = info.getViewIdResourceName();
+                        if(keyValue != null && keyValue.equals(nodeBean.getId())){
+                            ++count;
+                        }
+
+                        if(count == nodeBean.getIdInstance()){
+                            Log.d(TAG, "执行" + info + "=============" + nodeBean.getId());
+                            chooseOperation(nodeBean, info);
+                            isViewVisiable = true;
+                            break;
+                        }
+                    }
+                    if(isViewVisiable){
+                        break;
+                    }
+                }
+
                 if(isAvaliable(nodeBean.getText())){
                     for(AccessibilityNodeInfo info : infoView){
                         keyValue = String.valueOf(info.getText()) ;
@@ -372,24 +398,7 @@ public class MyWorkFlowService extends AccessibilityService {
                     }
                 }
 
-                if(isAvaliable(nodeBean.getId())){
-                    for(AccessibilityNodeInfo info : infoView){
-                        keyValue = info.getViewIdResourceName();
-                        if(keyValue != null && keyValue.equals(nodeBean.getId())){
-                            ++count;
-                        }
 
-                        if(count == nodeBean.getIdInstance()){
-                            Log.d(TAG, "执行" + info + "=============" + nodeBean.getId());
-                            chooseOperation(nodeBean, info);
-                            isViewVisiable = true;
-                            break;
-                        }
-                    }
-                    if(isViewVisiable){
-                        break;
-                    }
-                }
 
                 if(isAvaliable(nodeBean.getContent())){
                     for(AccessibilityNodeInfo info : infoView){
