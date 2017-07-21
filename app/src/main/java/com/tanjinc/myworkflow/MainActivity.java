@@ -1,7 +1,10 @@
 package com.tanjinc.myworkflow;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
 import android.provider.Settings;
@@ -9,8 +12,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Xml;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
+import android.widget.Button;
 import android.widget.Toast;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "MainActivity";
@@ -18,6 +27,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private MagicGroup mSettingView;
     private int i;
 
+    private Button mAddTaskBtn;
+    private TaskListLayout mTaskListLayout;
     private MyWorkFlowServiceHelper mHelper;
 
     private Handler handler = new Handler();
@@ -27,14 +38,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mTaskListLayout = (TaskListLayout) findViewById(R.id.task_layout);
+        mTaskListLayout.setOnItemClickListener(new TaskListLayout.OnItemClickListener() {
+            @Override
+            public void onItemClick(TaskListLayout.TaskInfo taskInfo) {
+                //执行任务
+                XmlUtils.readXml(taskInfo.taskName);
+            }
+        });
+
+        mAddTaskBtn = (Button) findViewById(R.id.add_btn);
+        mAddTaskBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //添加任务
+                mTaskListLayout.addTask(new TaskListLayout.TaskInfo("任务" + i));
+                i++;
+            }
+        });
+
         mSettingView = (MagicGroup) findViewById(R.id.setting_layout);
         mHelper = new MyWorkFlowServiceHelper(getApplicationContext());
 
-        if (mHelper.serviceEnable(getPackageName()+"/com.tanjinc.myworkflow.MyWorkFlowService")) {
-            Toast.makeText(MainActivity.this, "服务已启动", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(MainActivity.this, "服务未启动", Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Override
@@ -44,12 +69,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void run() {
                 try {
-                    openAccessbility();
+                    openAccessibility();
+
                 }catch (Exception e){
                     e.printStackTrace();
                 }
             }
         }).start();
+
+        if (mHelper.serviceEnable(getPackageName()+"/com.tanjinc.myworkflow.MyWorkFlowService")) {
+            Toast.makeText(MainActivity.this, "服务已启动", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(MainActivity.this, "服务未启动", Toast.LENGTH_SHORT).show();
+            showAccessibilityServiceEnableWarning();
+        }
     }
 
     @Override
@@ -72,7 +105,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.add_btn:
 //                mSettingView.addMagicView("控件 " + (i++));
-                mHelper.notifyAccessibilityChange();
                 break;
         }
         Toast.makeText(MainActivity.this, " id click: " + view.getId(), Toast.LENGTH_SHORT).show();
@@ -80,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     // 打开无障碍辅助开关，此功能需要系统签名
-    private void openAccessbility(){
+    private void openAccessibility(){
         int i = 0;
         if (!isAccessibilitySettingsOn()) {
             while (i < 5) {
@@ -143,4 +175,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         return false;
     }
+
+
+    private void showAccessibilityServiceEnableWarning() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setMessage("Please enable accessibility service")
+                .setTitle("Accessibility service needed")
+                .setPositiveButton("Take me to Settings", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivityForResult(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), 0);
+                    }
+                });
+
+        AlertDialog dialog = builder.create();
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.show();
+    }
+
 }

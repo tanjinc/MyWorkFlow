@@ -4,34 +4,30 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
     tools:context="com.tanjinc.myworkflow.MainActivity">
 
+    <com.tanjinc.myworkflow.TaskListLayout
+        android:id="@+id/task_layout"
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+
+    </com.tanjinc.myworkflow.TaskListLayout>
 
     <Button
         android:id="@+id/add_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="10dp"
         android:text="Add"
         android:onClick="onClick"/>
     <Button
         android:id="@+id/btn1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="通讯录"
+        android:layout_margin="10dp"
+        android:text="选择应用"
         android:onClick="onClick"/>
-    <EditText
-        android:id="@+id/edit_test"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-    <TextView
-        android:id="@+id/text_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="hello world"/>
+
     <include layout="@layout/setting_layout"/>
 </LinearLayout>

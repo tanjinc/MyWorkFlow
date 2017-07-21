@@ -123,7 +123,6 @@ public class MyWorkFlowService extends AccessibilityService {
 
     private long id;
     private String recordPacketName; //当前录制的视频包名
-    private AutoTestControllMsg msg = new AutoTestControllMsg();
     private ArrayList<AutoTestControllMsg> mActionArray = new ArrayList();
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
         int eventType = accessibilityEvent.getEventType();
@@ -140,7 +139,7 @@ public class MyWorkFlowService extends AccessibilityService {
                 // 获取到ID或索引值，就可以进行点击
 
                 if (Utils.isAutoBoxRecording(getApplicationContext(), packetName)) {
-                    msg.clear();
+                    AutoTestControllMsg msg = new AutoTestControllMsg();
                     recordView.clear();    // 暂存值，防止这一过程页面变化点击过快，infoView再出什么变化
                     recordView.addAll(infoView);
 
@@ -161,8 +160,7 @@ public class MyWorkFlowService extends AccessibilityService {
 
                     mActionArray.add(msg);
 
-                    Log.d(TAG, msg.toString());
-                    Log.d(TAG, "==============End====================");
+                    Log.d(TAG, "onclick :" + msg.toString());
 
                 }
                 break;
@@ -325,12 +323,18 @@ public class MyWorkFlowService extends AccessibilityService {
     private synchronized String getViewIdBySearchAllView(AccessibilityNodeInfo accessibilityNodeInfo, ArrayList<AccessibilityNodeInfo> list){
         Rect srcBounds = new Rect();
         Rect compareBounds = new Rect();
-        accessibilityNodeInfo.getBoundsInScreen(compareBounds);
+        accessibilityNodeInfo.refresh();
+        accessibilityNodeInfo.getBoundsInParent(compareBounds);
         Log.d(TAG, "控件坐标为:" + compareBounds.left  + "  " + compareBounds.right + "  " + compareBounds.bottom + "  " + compareBounds.top);
+
+        Log.d(TAG, "video getViewIdBySearchAllView: " + accessibilityNodeInfo.toString());
+
         for(AccessibilityNodeInfo info : list){
             info.getBoundsInScreen(srcBounds);
-            if(compareBounds.left == srcBounds.left && compareBounds.right == srcBounds.right
-                    && compareBounds.bottom == srcBounds.bottom && compareBounds.top == srcBounds.top){
+            if(compareBounds.left == srcBounds.left
+                    && compareBounds.right == srcBounds.right
+                    && compareBounds.bottom == srcBounds.bottom
+                    && compareBounds.top == srcBounds.top){
                 Log.d(TAG, "重新查找得控件的ID:" + info.getViewIdResourceName());
                 return info.getViewIdResourceName();
             }

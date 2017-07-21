@@ -1,7 +1,11 @@
 package com.tanjinc.myworkflow;
 
+import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Xml;
 
@@ -11,6 +15,7 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,16 +24,26 @@ import java.util.List;
 public class XmlUtils {
     private static final String TAG = "XmlUtils";
 
+    public static String xmlDirPath = Environment.getExternalStorageDirectory().getPath() + "/autobox";
     /**
      * 写xml
      * @param xmlName
      *
      */
-    public static void saveXml(String xmlName, String packetName, List<AutoTestControllMsg> actions) {
+    public static boolean saveXml(String xmlName, String packetName, List<AutoTestControllMsg> actions) {
         try {
-            Log.d(TAG, "saveXml()");
-            File file = new File(Environment.getExternalStorageDirectory(), xmlName);
+            Log.d(TAG, "video saveXml: actions = " + actions.toString());
 
+            File dirFile = new File(xmlDirPath);
+            if (!dirFile.exists()) {
+                dirFile.mkdir();
+            }
+
+            File file = new File(xmlDirPath, xmlName);
+            if (file.exists()) {
+                file.delete();
+            }
+            file.createNewFile();
             FileOutputStream fos = new FileOutputStream(file);
             // 获得一个序列化工具
             XmlSerializer serializer = Xml.newSerializer();
@@ -39,7 +54,10 @@ public class XmlUtils {
             serializer.startTag(null, "packetName");
             serializer.text(packetName);
             if (actions != null) {
+                int i=0;
                 for (AutoTestControllMsg msg : actions) {
+                    Log.d(TAG, "video saveXml: " + i++ + " msg"+ msg.toString());
+
                     serializer.startTag(null, "idInfo");
 
                     serializer.startTag(null, "id");
@@ -51,7 +69,7 @@ public class XmlUtils {
                     serializer.endTag(null, "idInstance");
 
                     serializer.startTag(null, "text");
-                    serializer.text(msg.getText());
+                    serializer.text(msg.getText() != null ? msg.getText() : "");
                     serializer.endTag(null, "text");
 
                     serializer.startTag(null, "textInstance");
@@ -70,11 +88,13 @@ public class XmlUtils {
                 }
             }
             serializer.endTag(null, "packetName");
-
             serializer.endDocument();
+            Log.d(TAG, "video saveXml: " + serializer.toString());
             fos.close();
+            return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "video saveXml: ", e);
+            return false;
         }
 
     }
@@ -85,8 +105,21 @@ public class XmlUtils {
      */
     public static void readXml(String xmlName) {
 
+        ArrayList<AutoTestControllMsg> msgList = new ArrayList<>();
+
+        String packetName="";
+
+        String text="";
+        int textInstance=0;
+        String id = "";
+        int idInstance = 0;
+        String clazz = "";
+        int clazzInstance = 0;
+        String content = "";
+        int contentInstance = 0;
+
         try {
-            File path = new File(Environment.getExternalStorageDirectory(),xmlName);
+            File path = new File(xmlDirPath, xmlName);
             FileInputStream fis = new FileInputStream(path);
 
             // 获得pull解析器对象
@@ -96,35 +129,67 @@ public class XmlUtils {
 
             int eventType = parser.getEventType(); // 获得事件类型
 
-            String id = null;
-            String rect = null;
-            String gender = null;
-            String age = null;
+
+
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 String tagName = parser.getName(); // 获得当前节点的名称
-
+                Log.d(TAG, "video readXml: " + tagName);
                 switch (eventType) {
+
                     case XmlPullParser.START_TAG: // 当前等于开始节点 <person>
                         if ("packetName".equals(tagName)) { // <person id="1">
+                            packetName = parser.getAttributeValue(null, "packetName");
+                        } else if ("text".equals(tagName)) {
+                            text = parser.getAttributeValue(null, "text");
+                        } else if ("textInstance".equals(tagName)) {
+                            textInstance = Integer.valueOf(parser.getAttributeValue(null, "textInstance"));
+                        } else if ("id".equals(tagName)) {
                             id = parser.getAttributeValue(null, "id");
-                        } else if ("rect".equals(tagName)) { // <name>
-                            rect = parser.nextText();
+                        } else if ("idInstance".equals(tagName)) {
+                            idInstance = Integer.valueOf(parser.getAttributeValue(null, "idInstance"));
+                        } else if ("clazz".equals(tagName)) {
+                            clazz = parser.getAttributeValue(null, "clazz");
+                        } else if ("clazzInstance".equals(tagName)) {
+                            clazzInstance = Integer.valueOf(parser.getAttributeValue(null, "clazzInstance"));
+                        } else if ("content".equals(tagName)) {
+                            content = parser.getAttributeValue(null, "content");
+                        } else if ("contentInstance".equals(tagName)) {
+                            contentInstance = Integer.valueOf(parser.getAttributeValue(null, "contentInstance"));
                         }
                         break;
                     case XmlPullParser.END_TAG: // </persons>
                         if ("packetName".equals(tagName)) {
-                            Log.i(TAG, "id---" + id);
                         }
                         break;
                     default:
                         break;
                 }
+                Log.d(TAG, "video readXml: packetName = " + packetName);
+                Log.d(TAG, "video readXml: text= " + text + " textInstance=" + textInstance);
+                Log.d(TAG, "video readXml: id= " + id + " idInstance=" + idInstance);
+                Log.d(TAG, "video readXml: clazz= " + clazz + " clazzInstance=" + clazzInstance);
+                Log.d(TAG, "video readXml: content= " + content + " contentInstance=" + contentInstance);
                 eventType = parser.next(); // 获得下一个事件类型
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "video readXml: ",e );
         } finally {
 
         }
+    }
+
+    static public ArrayList<String> queryXmlFiles(){
+        ArrayList<String> xmlFiles = new ArrayList<>();
+
+        File dir = new File(xmlDirPath);
+        File[] files = dir.listFiles();
+        if (files != null && files.length != 0) {
+            for (File file : files) {
+                Log.d(TAG, "video queryXmlFiles: " + file.getName());
+
+                xmlFiles.add(file.getName());
+            }
+        }
+        return xmlFiles;
     }
 }
