@@ -17,6 +17,7 @@ import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.Toast;
 
 import com.tanjinc.myworkflow.utils.ShellUtils;
 import com.tanjinc.myworkflow.utils.Utils;
@@ -83,15 +84,22 @@ public class MyWorkFlowService extends AccessibilityService {
 
     }
 
+    private Thread thread;
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            Log.d(TAG, "video onReceive: action = " + action);
-            if (action.equals(AUTOBOX_START_APP)) {
-                String taskName = intent.getStringExtra("taskName");
-                doAutoTask(taskName);
-            }
+        public void onReceive(Context context, final Intent intent) {
+            thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    String action = intent.getAction();
+                    Log.d(TAG, "video onReceive: action = " + action);
+                    if (action.equals(AUTOBOX_START_APP)) {
+                        String taskName = intent.getStringExtra("taskName");
+                        doAutoTask(taskName);
+                    }
+                }
+            });
+            thread.start();
         }
     };
 
@@ -193,23 +201,29 @@ public class MyWorkFlowService extends AccessibilityService {
                     recordView.addAll(infoView);
 
                     msg.setActionType("click");
-                    msg.setId(getViewIdBySearchAllView(accessibilityEvent.getSource(), recordView));
+                    AccessibilityNodeInfo info = getRootViewAccessibilityNodeInfo(accessibilityEvent.getSource(), recordView);
+                    msg.setId(getViewIdBySearchAllView(info));
                     msg.setIdInstance(getViewInstance(msg.getId(), accessibilityEvent.getSource(),
                             WidgetType.ID, recordView));
                     msg.setText(String.valueOf(accessibilityEvent.getSource().getText()));
                     msg.setTextInstance(getViewInstance(msg.getText(), accessibilityEvent.getSource(),
                             WidgetType.TEXT, recordView));
 
-                    msg.setClazz((String) accessibilityEvent.getSource().getClassName());
-                    msg.setClazzInstance(getViewInstance(msg.getClazz(), accessibilityEvent.getSource(),
-                            WidgetType.CLASS, recordView));
                     msg.setContent((String) accessibilityEvent.getSource().getContentDescription());
                     msg.setContentInstance(getViewInstance(msg.getContent(), accessibilityEvent.getSource(),
                             WidgetType.CONTENT, recordView));
 
+                    if(info != null && !isAvaliable(msg.getId()) && !isAvaliable(msg.getText()) && !isAvaliable(msg.getContent())){
+                        searchAvaliableNodeMsg(msg, info);
+                    }
+
+                    msg.setClazz((String) accessibilityEvent.getSource().getClassName());
+                    msg.setClazzInstance(getViewInstance(msg.getClazz(), accessibilityEvent.getSource(),
+                            WidgetType.CLASS, recordView));
 
                     mActionArray.add(msg);
 
+                    Toast.makeText(MyWorkFlowService.this, "下一步", Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "onclick :" + msg.toString());
 
                 }
@@ -233,21 +247,16 @@ public class MyWorkFlowService extends AccessibilityService {
                     msg.setActionType("inputText");
                     msg.setInputText(String.valueOf(accessibilityEvent.getSource().getText()));
 
-
-                    msg.setId(getViewIdBySearchAllView(accessibilityEvent.getSource(), recordView));
-                    msg.setIdInstance(getViewInstance(msg.getId(), accessibilityEvent.getSource(),
-                            WidgetType.ID, recordView));
-
-                    msg.setText(null);
-                    msg.setTextInstance(0);
-
-                    msg.setContent((String) accessibilityEvent.getSource().getContentDescription());
-                    msg.setContentInstance(getViewInstance(msg.getContent(), accessibilityEvent.getSource(),
-                            WidgetType.CONTENT, recordView));
-
-                    if(!isAvaliable(msg.getId()) && !isAvaliable(msg.getText()) && !isAvaliable(msg.getContent())){
-
-                    }
+//                    msg.setId(getViewIdBySearchAllView(accessibilityEvent.getSource(), recordView));
+//                    msg.setIdInstance(getViewInstance(msg.getId(), accessibilityEvent.getSource(),
+//                            WidgetType.ID, recordView));
+//
+//                    msg.setText(null);
+//                    msg.setTextInstance(0);
+//
+//                    msg.setContent((String) accessibilityEvent.getSource().getContentDescription());
+//                    msg.setContentInstance(getViewInstance(msg.getContent(), accessibilityEvent.getSource(),
+//                            WidgetType.CONTENT, recordView));
 
                     msg.setClazz((String) accessibilityEvent.getSource().getClassName());
                     msg.setClazzInstance(getViewInstance(msg.getClazz(), accessibilityEvent.getSource(),
@@ -261,6 +270,7 @@ public class MyWorkFlowService extends AccessibilityService {
 
                 break;
             case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+                getrowNode();
                 eventText = "TYPE_WINDOW_STATE_CHANGED";
 
                 if (!packetName.equals(recordPacketName)) {
@@ -321,7 +331,38 @@ public class MyWorkFlowService extends AccessibilityService {
 
     }
 
-    
+    private void searchAvaliableNodeMsg(AutoTaskNodeBean msg, AccessibilityNodeInfo node){
+        if (node.getChildCount() != 0) {
+            for (int i = 0; i < node.getChildCount(); i++) {
+                if (node.getChild(i) != null) {
+                    if(node.getChild(i).getViewIdResourceName() != null){
+                        msg.setId(node.getChild(i).getViewIdResourceName());
+                        msg.setIdInstance(getViewInstance(msg.getId(), node.getChild(i), WidgetType.ID, recordView));
+                        break;
+                    }
+
+                    if(node.getChild(i).getText() != null && isAvaliable(String.valueOf(node.getChild(i).getText()))){
+                        msg.setText(String.valueOf(node.getChild(i).getText()));
+                        msg.setTextInstance(getViewInstance(msg.getText(), node.getChild(i), WidgetType.TEXT, recordView));
+                        break;
+                    }
+
+                    if(node.getChild(i).getContentDescription() != null && isAvaliable(String.valueOf(node.getChild(i).getContentDescription()))){
+                        msg.setContent(String.valueOf(node.getChild(i).getContentDescription()));
+                        msg.setContentInstance(getViewInstance(msg.getContent(), node.getChild(i), WidgetType.CONTENT, recordView));
+                        break;
+                    }
+
+                    recycle(node.getChild(i));
+                }
+            }
+        }
+
+
+
+    }
+
+
 
     /**
      * 选择操作函数
@@ -330,12 +371,22 @@ public class MyWorkFlowService extends AccessibilityService {
      */
     private void chooseOperation(AutoTaskNodeBean nodeBean, AccessibilityNodeInfo info){
         if(nodeBean.getActionType().equals("click")){
-            info.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+            boolean isClickSuccess = info.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+            Log.d(TAG, "可否点击:" + isClickSuccess);
+            if(!isClickSuccess){
+                Rect nodeRect = new Rect();
+                info.getBoundsInScreen(nodeRect);
+                Log.d(TAG, "执行shell命令点击");
+                String command = "input tap " + nodeRect.centerX() + " " + nodeRect.centerY();
+                Log.d(TAG, "执行命令为：" + command);
+                ShellUtils.execCommand("input tap " + nodeRect.centerX() + " " + nodeRect.centerY(), false, true);
+            }
         }else if(nodeBean.getActionType().equals("inputText")){
             Bundle arguments = new Bundle();
             arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
                     nodeBean.getInputText());
-            info.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
+            boolean isCanSetText = info.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
+            Log.d(TAG, "可否设置文本:" + isCanSetText);
         }
     }
 
@@ -344,11 +395,6 @@ public class MyWorkFlowService extends AccessibilityService {
      * @param nodeBean 节点储存信息
      */
     private void runAutoCase(AutoTaskNodeBean nodeBean, boolean isFreshWindowView, long waitViewTime){
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         long currentTime = System.currentTimeMillis();
         boolean isViewVisiable = false;
         while (System.currentTimeMillis() - currentTime < waitViewTime){
@@ -435,9 +481,15 @@ public class MyWorkFlowService extends AccessibilityService {
                         }
                     }
                     if(isViewVisiable){
+                        try {
+                            Thread.sleep(800);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                         break;
                     }
                 }
+
             }
 
             if(nodeBean.getActionType().equals("inputText") && isAvaliable(nodeBean.getClazz())){
@@ -455,6 +507,11 @@ public class MyWorkFlowService extends AccessibilityService {
                     }
                 }
                 if(isViewVisiable){
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 }
             }
@@ -467,11 +524,15 @@ public class MyWorkFlowService extends AccessibilityService {
 
 
     boolean isRunning;
-    private synchronized String getViewIdBySearchAllView(AccessibilityNodeInfo accessibilityNodeInfo, ArrayList<AccessibilityNodeInfo> list){
+    private synchronized String getViewIdBySearchAllView(AccessibilityNodeInfo info){
+        return info == null ? null : info.getViewIdResourceName();
+    }
+
+    private synchronized AccessibilityNodeInfo getRootViewAccessibilityNodeInfo(AccessibilityNodeInfo accessibilityNodeInfo, ArrayList<AccessibilityNodeInfo> list){
         Rect srcBounds = new Rect();
         Rect compareBounds = new Rect();
         accessibilityNodeInfo.refresh();
-        accessibilityNodeInfo.getBoundsInParent(compareBounds);
+        accessibilityNodeInfo.getBoundsInScreen(compareBounds);
         Log.d(TAG, "控件坐标为:" + compareBounds.left  + "  " + compareBounds.right + "  " + compareBounds.bottom + "  " + compareBounds.top);
 
         Log.d(TAG, "video getViewIdBySearchAllView: " + accessibilityNodeInfo.toString());
@@ -482,8 +543,7 @@ public class MyWorkFlowService extends AccessibilityService {
                     && compareBounds.right == srcBounds.right
                     && compareBounds.bottom == srcBounds.bottom
                     && compareBounds.top == srcBounds.top){
-                Log.d(TAG, "重新查找得控件的ID:" + info.getViewIdResourceName());
-                return info.getViewIdResourceName();
+                return info;
             }
         }
         return null;
@@ -515,30 +575,48 @@ public class MyWorkFlowService extends AccessibilityService {
             info.getBoundsInScreen(srcBounds);
             if(type == WidgetType.ID){
                 String id = info.getViewIdResourceName();
+                Log.d(TAG, "on text" + id);
                 if(id != null && id.equals(key)){
                     ++instance;
+                }
+
+                if(id != null && id.equals(key) && compareBounds.left == srcBounds.left && compareBounds.right == srcBounds.right
+                        && compareBounds.bottom == srcBounds.bottom && compareBounds.top == srcBounds.top){
+                    break;
                 }
             }else if(type == WidgetType.TEXT){
                 String text = info.getText() != null  ? info.getText().toString() : null;
                 if(text != null && text.equals(key)){
                     ++instance;
                 }
+
+                if(text != null && text.equals(key) && compareBounds.left == srcBounds.left && compareBounds.right == srcBounds.right
+                        && compareBounds.bottom == srcBounds.bottom && compareBounds.top == srcBounds.top){
+                    break;
+                }
             }else if(type == WidgetType.CLASS){
                 String clazz = (String)info.getClassName();
                 if(clazz != null && clazz.equals(key)){
                     ++instance;
+                }
+
+                if(clazz != null && clazz.equals(key) && compareBounds.left == srcBounds.left && compareBounds.right == srcBounds.right
+                        && compareBounds.bottom == srcBounds.bottom && compareBounds.top == srcBounds.top){
+                    break;
                 }
             }else if(type == WidgetType.CONTENT){
                 String content = (String) info.getContentDescription();
                 if(content != null && content.equals(key)){
                     ++instance;
                 }
+
+                if(content != null && content.equals(key) && compareBounds.left == srcBounds.left && compareBounds.right == srcBounds.right
+                        && compareBounds.bottom == srcBounds.bottom && compareBounds.top == srcBounds.top){
+                    break;
+                }
             }
 
-            if(compareBounds.left == srcBounds.left && compareBounds.right == srcBounds.right
-                    && compareBounds.bottom == srcBounds.bottom && compareBounds.top == srcBounds.top){
-                break;
-            }
+
         }
         return instance;
 
@@ -551,17 +629,17 @@ public class MyWorkFlowService extends AccessibilityService {
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     public ArrayList<AccessibilityNodeInfo> getrowNode() {
-        for (int x = 0; x < 4; x++) {
+//        for (int x = 0; x < 4; x++) {
             AccessibilityNodeInfo rootNode = getRootInActiveWindow();
             if (rootNode != null) {
                 this.infoView.clear();
                 recycle(rootNode);
                 return this.infoView;
             }
-            if (x < 3) {
-                SystemClock.sleep(250);
-            }
-        }
+//            if (x < 3) {
+//                SystemClock.sleep(250);
+//            }
+//        }
         return null;
     }
 
