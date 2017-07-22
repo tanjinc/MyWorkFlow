@@ -221,9 +221,9 @@ public class MyWorkFlowService extends AccessibilityService {
                     msg.setContentInstance(getViewInstance(msg.getContent(), accessibilityEvent.getSource(),
                             WidgetType.CONTENT, recordView));
 
-                    if(info != null && !isAvaliable(msg.getId()) && !isAvaliable(msg.getText()) && !isAvaliable(msg.getContent())){
-                        searchAvaliableNodeMsg(msg, info);
-                    }
+//                    if(info != null && !isAvaliable(msg.getId()) && !isAvaliable(msg.getText()) && !isAvaliable(msg.getContent())){
+//                        searchAvaliableNodeMsg(msg, info);
+//                    }
 
                     msg.setClazz((String) accessibilityEvent.getSource().getClassName());
                     msg.setClazzInstance(getViewInstance(msg.getClazz(), accessibilityEvent.getSource(),
@@ -231,7 +231,6 @@ public class MyWorkFlowService extends AccessibilityService {
 
                     mActionArray.add(msg);
 
-                    Toast.makeText(MyWorkFlowService.this, "下一步", Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "onclick :" + msg.toString());
 
                 }
@@ -278,7 +277,7 @@ public class MyWorkFlowService extends AccessibilityService {
 
                 break;
             case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-                getrowNode();
+                //getrowNode();
                 eventText = "TYPE_WINDOW_STATE_CHANGED";
 
                 if (!packetName.equals(recordPacketName)) {
@@ -406,6 +405,11 @@ public class MyWorkFlowService extends AccessibilityService {
     private void runAutoCase(AutoTaskNodeBean nodeBean, boolean isFreshWindowView, long waitViewTime){
         long currentTime = System.currentTimeMillis();
         boolean isViewVisiable = false;
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         while (System.currentTimeMillis() - currentTime < waitViewTime){
             int count = 0;
             String keyValue;
@@ -414,6 +418,15 @@ public class MyWorkFlowService extends AccessibilityService {
             }
 
             if(nodeBean.getActionType().equals("click")){
+
+                if(isViewVisiable){
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
 
                 if(isAvaliable(nodeBean.getId())){
                     for(AccessibilityNodeInfo info : infoView){
@@ -458,7 +471,7 @@ public class MyWorkFlowService extends AccessibilityService {
 
                 if(isAvaliable(nodeBean.getContent())){
                     for(AccessibilityNodeInfo info : infoView){
-                        keyValue = (String) info.getContentDescription();
+                        keyValue = String.valueOf(info.getContentDescription());
                         if(keyValue != null && keyValue.equals(nodeBean.getContent())){
                             ++count;
                         }
@@ -489,14 +502,7 @@ public class MyWorkFlowService extends AccessibilityService {
                             break;
                         }
                     }
-                    if(isViewVisiable){
-                        try {
-                            Thread.sleep(800);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        break;
-                    }
+
                 }
 
             }
@@ -516,11 +522,6 @@ public class MyWorkFlowService extends AccessibilityService {
                     }
                 }
                 if(isViewVisiable){
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
                     break;
                 }
             }
@@ -614,7 +615,7 @@ public class MyWorkFlowService extends AccessibilityService {
                     break;
                 }
             }else if(type == WidgetType.CONTENT){
-                String content = (String) info.getContentDescription();
+                String content = String.valueOf(info.getContentDescription());
                 if(content != null && content.equals(key)){
                     ++instance;
                 }

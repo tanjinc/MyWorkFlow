@@ -3,8 +3,7 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:orientation="horizontal"
               android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-    android:background="#d273e9e9">
+              android:layout_height="wrap_content">
     <ImageView
         android:id="@+id/app_icon"
         android:layout_width="wrap_content"

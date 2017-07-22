@@ -36,7 +36,7 @@ public class XmlUtils {
                 dirFile.mkdir();
             }
 
-            File file = new File(xmlDirPath, autoTaskBean.getTaskName());
+            File file = new File(xmlDirPath, autoTaskBean.getTaskName()+".xml");
             if (file.exists()) {
                 file.delete();
             }
