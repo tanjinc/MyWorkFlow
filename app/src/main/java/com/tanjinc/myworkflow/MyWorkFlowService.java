@@ -253,26 +253,32 @@ public class MyWorkFlowService extends AccessibilityService {
 
                     msg.setActionType("inputText");
                     msg.setInputText(String.valueOf(accessibilityEvent.getSource().getText()));
+                    Log.d(TAG, "onInputText:" + String.valueOf(accessibilityEvent.getSource().getText()));
 
-//                    msg.setId(getViewIdBySearchAllView(accessibilityEvent.getSource(), recordView));
-//                    msg.setIdInstance(getViewInstance(msg.getId(), accessibilityEvent.getSource(),
-//                            WidgetType.ID, recordView));
-//
-//                    msg.setText(null);
-//                    msg.setTextInstance(0);
-//
-//                    msg.setContent((String) accessibilityEvent.getSource().getContentDescription());
-//                    msg.setContentInstance(getViewInstance(msg.getContent(), accessibilityEvent.getSource(),
-//                            WidgetType.CONTENT, recordView));
+                    AccessibilityNodeInfo info = getRootViewAccessibilityNodeInfo(accessibilityEvent.getSource(), recordView);
+                    String id = getViewIdBySearchAllView(info);
+                    if(!(id.equals("com.android.dialer:id/digits") && null != packetName && packetName.equals("com.android.dialer"))){
+                        msg.setId(id);
+                        msg.setIdInstance(getViewInstance(msg.getId(), accessibilityEvent.getSource(),
+                                WidgetType.ID, recordView));
 
-                    msg.setClazz((String) accessibilityEvent.getSource().getClassName());
-                    msg.setClazzInstance(getViewInstance(msg.getClazz(), accessibilityEvent.getSource(),
-                            WidgetType.CLASS, recordView));
+                        msg.setText(null);
+                        msg.setTextInstance(0);
+
+                        msg.setContent((String) accessibilityEvent.getSource().getContentDescription());
+                        msg.setContentInstance(getViewInstance(msg.getContent(), accessibilityEvent.getSource(),
+                                WidgetType.CONTENT, recordView));
+
+                        msg.setClazz((String) accessibilityEvent.getSource().getClassName());
+                        msg.setClazzInstance(getViewInstance(msg.getClazz(), accessibilityEvent.getSource(),
+                                WidgetType.CLASS, recordView));
 
 
-                    mActionArray.add(msg);
+                        mActionArray.add(msg);
+                        Log.d(TAG, "inputText :" + msg.toString());
+                    }
 
-                    Log.d(TAG, "inputText :" + msg.toString());
+
                 }
 
                 break;
@@ -428,24 +434,6 @@ public class MyWorkFlowService extends AccessibilityService {
                     break;
                 }
 
-                if(isAvaliable(nodeBean.getId())){
-                    for(AccessibilityNodeInfo info : infoView){
-                        keyValue = info.getViewIdResourceName();
-                        if(keyValue != null && keyValue.equals(nodeBean.getId())){
-                            ++count;
-                        }
-
-                        if(count == nodeBean.getIdInstance()){
-                            Log.d(TAG, "执行" + info + "=============" + nodeBean.getId());
-                            chooseOperation(nodeBean, info);
-                            isViewVisiable = true;
-                            break;
-                        }
-                    }
-                    if(isViewVisiable){
-                        break;
-                    }
-                }
 
                 if(isAvaliable(nodeBean.getText())){
                     for(AccessibilityNodeInfo info : infoView){
@@ -462,6 +450,26 @@ public class MyWorkFlowService extends AccessibilityService {
                         }
                     }
 
+                    if(isViewVisiable){
+                        break;
+                    }
+                }
+
+
+                if(isAvaliable(nodeBean.getId())){
+                    for(AccessibilityNodeInfo info : infoView){
+                        keyValue = info.getViewIdResourceName();
+                        if(keyValue != null && keyValue.equals(nodeBean.getId())){
+                            ++count;
+                        }
+
+                        if(count == nodeBean.getIdInstance()){
+                            Log.d(TAG, "执行" + info + "=============" + nodeBean.getId());
+                            chooseOperation(nodeBean, info);
+                            isViewVisiable = true;
+                            break;
+                        }
+                    }
                     if(isViewVisiable){
                         break;
                     }
