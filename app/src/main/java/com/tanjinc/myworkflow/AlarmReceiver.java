@@ -23,7 +23,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                 long startTime = bundle.getLong("startTime", 0);
                 String taskName = bundle.getString("taskName");
                 Log.d(TAG, "startTime = " + startTime);
-                Log.d(TAG, "taskName = " + taskName);
+                Log.d(TAG, "taskName = " + taskName + ".xml");
 
                 startTask(context, taskName);
 

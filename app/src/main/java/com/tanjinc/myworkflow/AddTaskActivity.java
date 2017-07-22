@@ -4,10 +4,12 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import java.util.Calendar;
 
@@ -47,7 +49,11 @@ public class AddTaskActivity extends AppCompatActivity implements View.OnClickLi
                 openAppDialog();
                 break;
             case R.id.alarm_btn:
-                showTimeDialog();
+                if(TextUtils.isEmpty(mEditText.getText().toString())){
+                    Toast.makeText(getApplicationContext(), "请先填写任务名", Toast.LENGTH_SHORT).show();
+                }else{
+                    showTimeDialog();
+                }
                 break;
             default:
                 break;
@@ -61,8 +67,8 @@ public class AddTaskActivity extends AppCompatActivity implements View.OnClickLi
                 // 设置定时任务
                 long startTime = (hourOfDay * Constants.TIME.MINUTES_OF_HOUR + minute)
                         * Constants.TIME.SECONDS_OF_MINUTE * Constants.TIME.MILLS_OF_SECOND;
-                AlarmSetting.getInstance().setRepeatAlarm(getApplicationContext(),
-                        Constants.ACTION.ACTION_AUTOBOX_TASK, startTime);
+                AlarmSetting.getInstance().setAutoBoxTaskAlarm(getApplicationContext(),
+                        Constants.ACTION.ACTION_AUTOBOX_TASK, startTime, mEditText.getText().toString());
             }
         }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), true);
         timePickerDialog.setTitle("选择定时时间");

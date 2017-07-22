@@ -106,7 +106,7 @@ public class AlarmSetting {
     public void setAutoBoxTaskAlarm(Context context, String action, long startTime, String xmlName){
         Bundle bundle = new Bundle();
         bundle.putLong("startTime", startTime);
-        bundle.putString("xmlName", xmlName);
+        bundle.putString("taskName", xmlName);
         Calendar c = Calendar.getInstance();
         long currentHourMinuteToMills = (c.get(Calendar.HOUR_OF_DAY)
                 * Constants.TIME.MINUTES_OF_HOUR + c.get(Calendar.MINUTE))

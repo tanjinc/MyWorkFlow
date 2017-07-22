@@ -90,9 +90,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }).start();
 
         if (mHelper.serviceEnable(getPackageName()+"/com.tanjinc.myworkflow.MyWorkFlowService")) {
-            Toast.makeText(MainActivity.this, "服务已启动", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "服务已启动", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(MainActivity.this, "服务未启动", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "服务未启动", Toast.LENGTH_SHORT).show();
             showAccessibilityServiceEnableWarning();
         }
 
@@ -122,17 +122,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 openAccessibilityService();
                 if (!isAccessibilitySettingsOn()) {
                     openAccessibilityService();
-                    Log.d(TAG, "打开辅助开关失败");
+//                    Log.d(TAG, "打开辅助开关失败");
                     i++;
                 } else {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(MainActivity.this, "打开辅助开关成功", Toast.LENGTH_LONG).show();
+//                            Toast.makeText(MainActivity.this, "打开辅助开关成功", Toast.LENGTH_LONG).show();
                         }
                     });
 
-                    Log.d(TAG, "打开辅助开关成功");
+//                    Log.d(TAG, "打开辅助开关成功");
                     return;
                 }
             }
@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(MainActivity.this, "辅助开关状态：开启", Toast.LENGTH_LONG).show();
+//                    Toast.makeText(MainActivity.this, "辅助开关状态：开启", Toast.LENGTH_LONG).show();
                 }
             });
         }
