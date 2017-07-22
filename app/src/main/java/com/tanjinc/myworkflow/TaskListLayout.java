@@ -111,7 +111,7 @@ public class TaskListLayout extends FrameLayout {
         public void onBindViewHolder(TaskViewHolder holder, int position) {
             if (mTaskInfos != null && mTaskInfos.size() > 0) {
                 final TaskInfo taskInfo = mTaskInfos.get(position);
-                holder.mTaskNameTv.setText(taskInfo.taskName);
+                holder.mTaskNameTv.setText(taskInfo.taskName.split("\\.")[0]);
                 holder.mTaskNameTv.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {

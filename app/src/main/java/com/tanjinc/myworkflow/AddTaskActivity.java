@@ -41,9 +41,13 @@ public class AddTaskActivity extends AppCompatActivity implements View.OnClickLi
                 finish();
                 break;
             case R.id.finish_btn:
+                finish();
                 break;
             case R.id.record_action_btn:
                 openAppDialog();
+                break;
+            case R.id.alarm_btn:
+                showTimeDialog();
                 break;
             default:
                 break;

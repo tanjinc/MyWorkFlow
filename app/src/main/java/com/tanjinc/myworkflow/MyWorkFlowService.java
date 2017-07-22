@@ -221,9 +221,9 @@ public class MyWorkFlowService extends AccessibilityService {
                     msg.setContentInstance(getViewInstance(msg.getContent(), accessibilityEvent.getSource(),
                             WidgetType.CONTENT, recordView));
 
-//                    if(info != null && !isAvaliable(msg.getId()) && !isAvaliable(msg.getText()) && !isAvaliable(msg.getContent())){
-//                        searchAvaliableNodeMsg(msg, info);
-//                    }
+                    if(info != null && !isAvaliable(msg.getId()) && !isAvaliable(msg.getText()) && !isAvaliable(msg.getContent())){
+                        searchAvaliableNodeMsg(msg, info);
+                    }
 
                     msg.setClazz((String) accessibilityEvent.getSource().getClassName());
                     msg.setClazzInstance(getViewInstance(msg.getClazz(), accessibilityEvent.getSource(),
@@ -300,10 +300,10 @@ public class MyWorkFlowService extends AccessibilityService {
                         }
                         ViewManager.getInstance(getApplicationContext()).setStatus(FloatBall.TASK_FREE);
                         Utils.setAutoBoxRecording(getApplicationContext(), recordPacketName, false);
-                        ViewManager.getInstance(getApplicationContext()).setStatus(FloatBall.TASK_RECORD);
                     }
                     recordPacketName = packetName;
                 }
+
 
 
 
@@ -412,7 +412,7 @@ public class MyWorkFlowService extends AccessibilityService {
         long currentTime = System.currentTimeMillis();
         boolean isViewVisiable = false;
         try {
-            Thread.sleep(1000);
+            Thread.sleep(800);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
